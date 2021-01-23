@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: rgb(234, 234, 234) !important;
+  background-image: linear-gradient(
+    135deg,
+    rgb(4, 127, 131) 39%,
+    rgb(0, 0, 0) 89%
+  ) !important;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.ui.inverted.top.fixed.menu {
+  align-items: center;
+  justify-content: center;
+  background-image: linear-gradient(
+    135deg,
+    rgb(4, 127, 131) 39%,
+    rgb(0, 0, 0) 89%
+  ) !important;
+  border-bottom: 1px solid black;
+}
+.masthead {
+  display: flex;
+  align-items: center;
+  background-image: linear-gradient(
+    135deg,
+    rgb(4, 127, 131) 39%,
+    rgb(0, 0, 0) 89%
+  ) !important;
+  height: 100vh;
+}
+
+.masthead .ui.menu .ui.button,
+.ui.menu a.ui.inverted.button {
+  margin-left: 0.5em;
+}
+
+.masthead h1.ui.header {
+  font-size: 4em;
+  font-weight: normal;
+}
+
+.ui.inverted.vertical.center.aligned.segment.masthead {
+  align-items: center;
+  justify-content: center;
+}
+.masthead h2 {
+  font-size: 1.7em;
+  font-weight: normal;
+}
