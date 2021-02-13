@@ -79,9 +79,11 @@ const GroupClickToComment: React.FC<{ isAnnouncement: boolean }> = ({
           labelPosition='right'
           icon='add'
           content={isAnnouncement ? 'Announcement' : 'Comment'}
-          primary
           inverted
-          style={{ marginTop: isAnnouncement && '10px' }}
+          style={{
+            marginTop: isAnnouncement && '10px',
+            backgroundColor: '#bc4123',
+          }}
           onClick={() => setShouldComment(true)}
         />
       )}

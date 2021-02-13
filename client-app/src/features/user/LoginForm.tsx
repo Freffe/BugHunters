@@ -29,7 +29,12 @@ const LoginForm = () => {
         dirtySinceLastSubmit,
       }) => (
         <Form onSubmit={handleSubmit} error autoComplete='off'>
-          <Header as='h2' content='Login' color='teal' textAlign='center' />
+          <Header
+            as='h2'
+            content='Login'
+            textAlign='center'
+            style={{ color: 'white' }}
+          />
           <Field
             name='email'
             component={TextInput}
@@ -55,6 +60,7 @@ const LoginForm = () => {
             color='teal'
             content='Login'
             fluid
+            className='loginButton'
           />
         </Form>
       )}

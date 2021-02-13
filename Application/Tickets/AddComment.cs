@@ -56,7 +56,6 @@ namespace Application.Tickets
                 var comment = new Comment
                 {
                     Author = user,
-                    Group = group,
                     TicketId = ticket.Id,
                     Body = request.Body,
                     CreatedAt = DateTime.Now

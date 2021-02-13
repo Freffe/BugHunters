@@ -15,6 +15,7 @@ namespace Application.Photos
 {
     public class AddTicketPhoto
     {
+
         public class Command : IRequest<Photo>
         {
             public IFormFile File { get; set; }
@@ -34,6 +35,7 @@ namespace Application.Photos
             public async Task<Photo> Handle(Command request, CancellationToken cancellationToken)
             {
                 // handler logic
+
                 var photoUploadResult = _photoAccessor.AddPhoto(request.File);
 
                 var ticket = await _context.Tickets.SingleOrDefaultAsync(x => x.Id == request.Id);
@@ -43,7 +45,8 @@ namespace Application.Photos
                 var photo = new Photo
                 {
                     Url = photoUploadResult.Url,
-                    Id = photoUploadResult.PublicId
+                    Id = photoUploadResult.PublicId,
+                    Name = request.File.FileName
                 };
 
                 if (!ticket.Photos.Any(x => x.IsMain))

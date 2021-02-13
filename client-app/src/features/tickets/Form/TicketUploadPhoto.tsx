@@ -1,93 +1,124 @@
-import React, { useState } from 'react';
-import { Button, Grid, Icon, Segment, Image } from 'semantic-ui-react';
+import { observer } from 'mobx-react-lite';
+import React, { useContext, useState } from 'react';
+import { Button, Container, Icon } from 'semantic-ui-react';
+import MessageComponent from '../../../app/common/message/MessageComponent';
 import PhotoWidgetDropzone from '../../../app/common/photoUpload/PhotoWidgetDropzone';
+import { RootStoreContext } from '../../../app/stores/rootStore';
+import TicketAttachementsContainer from './TicketAttachementsContainer';
+import TicketPhotoContainer from './TicketPhotoContainer';
+
+const LIMIT_FILESIZE = 500000;
+const LIMIT_FILETYPE = ['image/jpeg', 'image/png', 'image/jpg'];
+
+const LIMIT_FILESIZETEXT = 50000;
+const LIMIT_FILETYPETEXT = ['text/plain', 'image/txt'];
 
 const TicketUploadPhoto: React.FC<{
-  setFilesForForm: (file: any[]) => void;
-}> = ({ setFilesForForm }) => {
-  const [files, setFiles] = useState<any[]>([]);
-  const [imageHeight, setImageHeight] = useState({ height: '140', id: '' });
+  setFilesForForm?: (file: any[] | any) => void;
+  isPreview: boolean;
+  isPhoto?: boolean;
+}> = ({ setFilesForForm, isPreview, isPhoto }) => {
+  const { ticketStore } = useContext(RootStoreContext);
+  const { isAddingPhoto, setTicketFiles } = ticketStore;
+  const [files, setFiles] = useState<any[] | any>([]);
+  const [isImageTooBig, setIsImageTooBig] = useState(false);
+  const [isBadFileType, setIsBadFileType] = useState(false);
 
   const handleFileSetting = (val: any) => {
-    setFiles(val);
-    setFilesForForm(val);
+    let isTooBig = false;
+    let isBadFile = false;
+    console.log('VAL: ', val);
+    val.forEach((item: any) => {
+      if (item.size > (isPhoto ? LIMIT_FILESIZE : LIMIT_FILESIZETEXT)) {
+        console.log('Setting too big1');
+        isTooBig = true;
+        setFiles([]);
+        if (setFilesForForm) setFilesForForm([]);
+        return;
+      }
+
+      if (
+        isPhoto
+          ? !LIMIT_FILETYPE.includes(item.type)
+          : !LIMIT_FILETYPETEXT.includes(item.type)
+      ) {
+        console.log('Textfile: ', item);
+        isBadFile = true;
+        setFiles([]);
+        if (setFilesForForm) setFilesForForm([]);
+        setIsBadFileType(true);
+      }
+    });
+
+    if (!isTooBig && !isBadFile) {
+      console.log('newMap: ', val);
+      setFiles(val);
+      // This call destroys document and destroys blob url!
+      //if (setFilesForForm) setFilesForForm(newMap); <--------
+      setTicketFiles(val);
+    } else {
+      if (isBadFile) setIsBadFileType(true);
+      if (isTooBig) setIsImageTooBig(true);
+    }
   };
+  console.log('files are: ', files.size);
   return (
-    <div style={{ marginBottom: '10px' }}>
+    <Container style={{ marginBottom: '10px' }} fluid>
       <PhotoWidgetDropzone setFiles={handleFileSetting} isTicket={true}>
         <Button
           type='button'
           size='tiny'
-          style={{ border: '1px black dashed' }}
-          fluid={true}
-          onClick={() => console.log('clicked')}
+          style={{ border: '1px black dashed', marginTop: '10px' }}
+          onClick={() => {
+            setIsImageTooBig(false);
+            setIsBadFileType(false);
+          }}
         >
-          Add Photo
+          {isPhoto ? 'Add Photo' : 'Add Text'}
           <Icon name='upload' size='large' style={{ marginLeft: '2px' }} />
         </Button>
       </PhotoWidgetDropzone>
-      {files.length > 0 && (
-        <Grid style={{ paddingTop: '10px' }}>
-          <Grid.Row
-            fluid='true'
-            columns={
-              files.length as
-                | 1
-                | 2
-                | 3
-                | 4
-                | 5
-                | 6
-                | 7
-                | 8
-                | 9
-                | 10
-                | 11
-                | 12
-                | 13
-                | 14
-                | 15
-                | 16
-                | undefined
-            }
-          >
-            {files?.map((img, i) => (
-              <Grid.Column key={i} fluid='true'>
-                <Segment compact>
-                  <Image
-                    src={img.preview}
-                    height={
-                      imageHeight.id === img.preview!
-                        ? imageHeight.height
-                        : '140'
-                    }
-                    width={
-                      imageHeight.id === img.preview!
-                        ? imageHeight.height
-                        : '140'
-                    }
-                    id={i}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => {
-                      imageHeight.height !== '500'
-                        ? setImageHeight({
-                            height: '500',
-                            id: img.preview!,
-                          })
-                        : setImageHeight({
-                            height: '140',
-                            id: img.preview!,
-                          });
-                    }}
-                  />
-                </Segment>
-              </Grid.Column>
-            ))}
-          </Grid.Row>
-        </Grid>
+      {isImageTooBig && (
+        <MessageComponent
+          status={true}
+          header={'Sorry your image is too big'}
+          message={`Compress the image and try again. Size > ${LIMIT_FILESIZE} kb.`}
+        />
       )}
-    </div>
+      {isBadFileType && (
+        <MessageComponent
+          status={true}
+          header={'Sorry that filetype is not accepted'}
+          message={'Change filetype to image/jpg or image/png.'}
+        />
+      )}
+      {files.length > 0 && !isImageTooBig && isPhoto! && !isBadFileType && (
+        <TicketAttachementsContainer
+          photos={files}
+          setFiles={setFiles}
+          setFilesForForm={setFilesForForm}
+        />
+      )}
+      {files.length > 0 && !isImageTooBig && !isPhoto! && !isBadFileType && (
+        <TicketAttachementsContainer
+          texts={files}
+          setFiles={setFiles}
+          setFilesForForm={setFilesForForm}
+        />
+      )}
+      {isPreview && files.length > 0 && !isImageTooBig && !isBadFileType && (
+        <Button
+          style={{ marginTop: '10px' }}
+          positive
+          content='submit'
+          loading={isAddingPhoto}
+          onClick={() => {
+            setFiles([]);
+          }}
+        />
+      )}
+    </Container>
   );
 };
 
-export default TicketUploadPhoto;
+export default observer(TicketUploadPhoto);

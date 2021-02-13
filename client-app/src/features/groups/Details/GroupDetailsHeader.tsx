@@ -31,6 +31,7 @@ const GroupDetailsHeader: React.FC<IProps> = ({
         marginTop: '0px',
         marginBottom: '0px',
         padding: '0px',
+        backgroundColor: 'rgb(7, 20, 38)',
       }}
     >
       <Grid columns='two'>
@@ -42,7 +43,7 @@ const GroupDetailsHeader: React.FC<IProps> = ({
                 marginRight: '2px',
                 width: '73px',
                 height: '73px',
-                border: '1px solid black',
+                border: '1px solid rgb(255, 255, 255, 0.5)',
               }}
               rounded
               src={photo?.url || '/assets/user.png'}
@@ -51,28 +52,29 @@ const GroupDetailsHeader: React.FC<IProps> = ({
 
           {isHostOrAdminOfGroup && (
             <Grid.Row textAlign='left'>
-              <Grid.Column>
-                <Popup
-                  header={'Delete Group Photo'}
-                  trigger={
-                    <Button
-                      style={{
-                        border: '1px solid black',
-                        fontSize: 'small',
-                        marginLeft: '0px',
-                        marginRight: '0px',
-                      }}
-                      negative
-                      icon='cancel'
-                      onClick={() => {
-                        deletePhoto(groupId, photo);
-                      }}
-                      loading={deletingGroupPhoto}
-                    />
-                  }
-                />
-              </Grid.Column>
-
+              {photo?.url && (
+                <Grid.Column>
+                  <Popup
+                    header={'Delete Group Photo'}
+                    trigger={
+                      <Button
+                        style={{
+                          border: '1px solid black',
+                          fontSize: 'small',
+                          marginLeft: '0px',
+                          marginRight: '0px',
+                        }}
+                        negative
+                        icon='cancel'
+                        onClick={() => {
+                          deletePhoto(groupId, photo);
+                        }}
+                        loading={deletingGroupPhoto}
+                      />
+                    }
+                  />
+                </Grid.Column>
+              )}
               {!photo?.url && (
                 <Grid.Column>
                   <Popup
@@ -105,10 +107,11 @@ const GroupDetailsHeader: React.FC<IProps> = ({
             as='h1'
             textAlign='center'
             style={{
-              marginLeft: '0px',
-              marginRight: '193px',
+              marginLeft: '53px',
               marginTop: '0px',
+              color: 'white',
             }}
+            floated='left'
           >
             {groupName}
           </Header>

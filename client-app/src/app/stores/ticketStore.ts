@@ -1,8 +1,8 @@
 import { makeAutoObservable, runInAction, toJS } from "mobx";
 import { history } from "../..";
 import agent from "../api/agent";
-import { IComment } from "../models/groups";
-import { ITicket, ITicketPhoto } from "../models/tickets";
+import { IComment, IMember } from "../models/groups";
+import { ITicket, ITicketPhoto, ITicketText } from "../models/tickets";
 import { RootStore } from "./rootStore";
 
 export default class TicketStore {
@@ -16,6 +16,8 @@ export default class TicketStore {
     // @observable
     tickets: ITicket[] = [];
     selectedTicket: ITicket | null = null;
+    // Testing ticketFiles k.
+    ticketFiles: any[] = [];
     ticketRegistry = new Map();
     loadingTickets = false;
     submittingTicket = false;
@@ -24,6 +26,8 @@ export default class TicketStore {
     isDeletingComment = false;
     isAddingPhoto = false;
     isDeletingPhoto = false;
+    isAddingText = false;
+    isDeletingText = false;
 
 
 
@@ -38,10 +42,31 @@ export default class TicketStore {
         return Array.from(this.ticketRegistry.values());
     }
 
+    isTicketCreatorOrAdmin =  () => {
+        // Requires that selected ticket is in selectedGroup.
+        runInAction(async () => {
+            if (this.rootStore.groupStore.groupRegistry.size === 0) {
+                await this.rootStore.groupStore.loadGroups();
+            }
+            
+            
+        })
+        const isAdmin = this.rootStore.groupStore.isHostOrAdminOfGroup || 
+            this.rootStore.groupStore.groupRegistry.get(this.selectedTicket?.groupId)?.members.filter((member: IMember) => 
+                member.isHost && member.username === this.rootStore.userStore.user?.username
+            ).length > 0;
+        // Is there another way to get isAdmin without groupStore without calling db?
+
+        const isCreator = this.selectedTicket?.creator === this.rootStore.userStore.user?.username;
+        return isAdmin || isCreator;
+    }
+
     setSelectedTicket = async (ticket: ITicket) => {
         try {
             runInAction(() => {
-                this.selectedTicket = ticket;
+                if (ticket)
+                    this.selectedTicket = ticket;
+                
             })
         } catch (error) {
             console.log(error);
@@ -110,10 +135,58 @@ export default class TicketStore {
             })
         }
     }
-    createWithPhoto = async (ticket: ITicket, photo: Blob) => {
+    fileToBlob = async (file: any) => {
+        return new Blob([new Uint8Array(await file.arrayBuffer())], {
+            type: file.type,
+          });
+    }
+    setTicketFiles = async (photo: any) => {
+        //this.ticketFiles = photo;
+        console.log("RECEIVED: ", photo)
+        if (photo.length > 0) {
+            let images: Array<{ blob: Blob; name: any }> = [];
+            for (var i = 0; i < photo.length; i++) {
+                //console.log("photo[i].type === ", photo[i].type, " photo[i] = ", photo[i], ["image/png", "image/jpg", "image/jpeg"].includes(photo[i].type))          
+                if (photo[i] && ["image/png", "image/jpg", "image/jpeg"].includes(photo[i].type)) {
+                    console.log("photo[i].name === ", photo[i].name)
+                    let image = await this.fileToBlob(photo[i]);
+                    let sendThis = { blob: image, name: photo[i].name };
+                    images.push(sendThis);
+                }
+
+                if (photo[i] && photo[i].type === "text/plain") {
+                    // Does it work with text files as blobs? lets see...
+                    let image = await this.fileToBlob(photo[i]);
+                    let sendThis = { blob: image, name: photo[i].name };
+                    images.push(sendThis);
+                }
+            }
+            runInAction(() => {
+                console.log("Setting ticketFiles to: ", images);
+                if (this.ticketFiles.length > 0) {
+                    images.forEach((image) => {
+                        this.ticketFiles.push(image);
+                    })
+                } else {
+                    this.ticketFiles = images;
+                }
+            })
+        } else {
+            runInAction(() => {
+                this.ticketFiles = [];
+            })
+        }
+
+        console.log("setTicketFiles: ", this.ticketFiles);
+    }
+
+    createWithPhoto = async (ticket: ITicket) => {
         this.submittingTicket = true;
         try {
-            await agent.Tickets.createWithPhoto(ticket, photo);
+            console.log("TICKETFILES: ", this.ticketFiles);
+            //await agent.Tickets.createWithPhoto(ticket, photo);
+            //console.log("Sending: ", photo);
+            await agent.Tickets.createTicketMultiple(ticket, this.ticketFiles)
             runInAction(() => {
                 // Maybe update stats list and force reload for ticketRegistry
                 this.ticketRegistry.set(ticket.id, ticket);
@@ -124,6 +197,7 @@ export default class TicketStore {
         } catch (error) {
             runInAction(() => {
                 this.submittingTicket = false;
+                this.setTicketFiles([]);
                 console.log("Error createTicket, ", error);
             })
         }
@@ -146,7 +220,7 @@ export default class TicketStore {
                 this.selectedTicket = ticket;
                 this.submittingTicket = false;
             });
-            history.push('/issues');
+            //history.push('/issues');
         } catch (error) {
             runInAction(() => {
                 this.submittingTicket = false;
@@ -154,6 +228,30 @@ export default class TicketStore {
             })
         }
     }
+
+    editTicketStatus = async (ticket: ITicket) => {
+        this.submittingTicket = true;
+        try {
+            await agent.Tickets.update(ticket);
+            runInAction(() => {
+                const oldTicketStatus = this.selectedTicket!.status.toLowerCase();
+                // Make sure to update ticketListStats if this field has been changed.
+                 const newTicketStatus = ticket.status.toLowerCase();   
+                if (newTicketStatus !== oldTicketStatus) {
+                    this.ticketListStats[newTicketStatus] += 1;
+                    this.ticketListStats[oldTicketStatus] -= 1;
+                } 
+                this.selectedTicket = ticket;
+                this.submittingTicket = false;
+            });
+        } catch (error) {
+            runInAction(() => {
+                this.submittingTicket = false;
+                console.log("Error editTicketStatus, ", error);
+            })
+        }
+    }
+
     // {{url}}/api/tickets/comment/47deb399-2e0f-48cb-8892-849fe306e08
     addComment = async (ticket: ITicket, comment: IComment) => {
         this.isAddingComment = true;
@@ -231,6 +329,7 @@ export default class TicketStore {
     addPhoto = async (ticketId: string, photo: Blob) => {
         this.isAddingPhoto = true;
         try {
+            console.log("Photo: ", photo);
             const returnedPhoto = await agent.Tickets.addPhoto(ticketId, photo);
             runInAction(() => {
                 // TODO: Try not to touch ticketregistry for now.
@@ -260,6 +359,47 @@ export default class TicketStore {
             runInAction(() => {
                 console.log(error);
                 this.isDeletingPhoto = false;
+            })
+
+        }
+    }
+
+    addTextFile = async (ticketId: string, text: Blob) => {
+        this.isAddingText = true;
+        try {
+            //console.log("TEXT BEFORE SENDING: ", text);
+            
+            const returnedTextFile = await agent.Tickets.addTextFile(ticketId, text);
+            runInAction(() => {
+                // TODO: Try not to touch ticketregistry for now.
+                if (returnedTextFile)
+                    this.selectedTicket!.texts?.push(returnedTextFile);
+                this.isAddingText = false;
+            })
+            
+        } catch (error) {
+            runInAction(() => {
+                console.log(error);
+                this.isAddingText = false;
+            })
+
+        }
+    }
+
+    deleteTextFile = async (ticketId: string, textId: string) => {
+        this.isDeletingText = true;
+        try {
+            await agent.Tickets.delTextFile(ticketId, textId);
+            runInAction(() => {
+                let updatedTexts = this.selectedTicket?.texts?.filter((text: ITicketText) => text.id !== textId)
+                this.selectedTicket!.texts = updatedTexts;
+                this.isDeletingText = false;
+            })
+            
+        } catch (error) {
+            runInAction(() => {
+                console.log(error);
+                this.isDeletingText = false;
             })
 
         }

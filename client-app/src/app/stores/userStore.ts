@@ -12,7 +12,7 @@ export default class UserStore {
       makeAutoObservable(this);
     }
     user: IUser | null = null;
-
+    isDeletingUser: boolean = false;
     get isLoggedIn() { return !!this.user}
 
     login = async (values: IUserFormValues) => {
@@ -53,11 +53,34 @@ export default class UserStore {
 
     register = async (values: IUserFormValues) => {
         try {
-            await agent.User.register(values);
+            values.dateJoined = new Date();
+            var user = await agent.User.register(values);
+            runInAction(() => {
+                this.user = user;
+            });
+            this.rootStore.commonStore.setToken(user.token);
+            this.startRefreshTokenTimer(user);
             //this.rootStore.modalStore.closeModal();
-            history.push(`/user/registerSuccess?email=${values.email}`);
+            //history.push(`/user/registerSuccess?email=${values.email}`);
         } catch(error) {
             throw error;
+        }
+    }
+
+    deleteAccount = async (user: string) => {
+        this.isDeletingUser = true;
+        try {
+            await agent.User.delete(user);
+            runInAction(() => {
+                this.user = null;
+                this.isDeletingUser = false;
+            })
+            history.push("/");
+        } catch (error) {
+            runInAction(() => {
+                console.log(error);
+                this.isDeletingUser = false;
+            })
         }
     }
 

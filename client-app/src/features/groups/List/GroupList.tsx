@@ -1,5 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, Dropdown, Grid, Segment } from 'semantic-ui-react';
+import {
+  Button,
+  Container,
+  Divider,
+  Dropdown,
+  Grid,
+  Segment,
+} from 'semantic-ui-react';
 import GroupListExplainer from './GroupListExplainer';
 import { observer } from 'mobx-react-lite';
 import { IGroup, IMember } from '../../../app/models/groups';
@@ -83,49 +90,75 @@ const GroupList: React.FC<IProps> = () => {
       setSelectedGroup={setSelectedGroup}
     />
   ) : (
-    <Grid divided='vertically' width={16}>
-      <Grid.Row style={{ margin: '10px', paddingBottom: '0px' }} columns={2}>
-        <Grid.Column floated={'left'}>
-          <Dropdown
-            placeholder='Select Group'
-            selection
-            defaultValue={selectedGroup!}
-            options={groupStore.groupTitles}
-            onChange={handleDropDownChange}
-          />
-        </Grid.Column>
-        <Grid.Column align='right' floated={'right'}>
-          <Button positive onClick={() => setCreatingGroup(true)}>
-            Create Group
-          </Button>
-        </Grid.Column>
-      </Grid.Row>
-
-      <Grid.Row style={{ margin: '10px' }} centered padded='horizontally'>
-        <Segment
-          style={{ width: '800px' /* Temporary css fix until later. */ }}
-          size='massive'
-        >
-          {selectedGroup ? (
-            isMember(selectedGroup!) ? (
-              <GroupDetails
-                group={groupStore.groupsByDate.find(
-                  (group: IGroup) => group.id === selectedGroup
-                )}
-              />
+    <Segment clearing style={{ border: '2px solid #bc4123' }}>
+      <Grid
+        style={{
+          margin: '0px',
+          marginBottom: '14px',
+        }}
+        stackable
+      >
+        <Grid.Row style={{ paddingBottom: '0px' }} columns={2}>
+          <Grid.Column
+            floated={'left'}
+            style={{ margin: '0px', padding: '10px' }}
+          >
+            <Dropdown
+              style={{ marginLeft: '0px' }}
+              placeholder='Select Group'
+              selection
+              defaultValue={selectedGroup!}
+              options={groupStore.groupTitles}
+              onChange={handleDropDownChange}
+            />
+          </Grid.Column>
+          <Grid.Column align='right' floated={'right'}>
+            <Button
+              style={{ margin: '0px' }}
+              positive
+              onClick={() => setCreatingGroup(true)}
+            >
+              Create Group
+            </Button>
+          </Grid.Column>
+        </Grid.Row>
+        <Divider
+          fitted
+          style={{
+            marginLeft: '10px',
+            marginRight: '10px',
+            marginBottom: '0px',
+          }}
+        />
+        <Grid.Row style={{ margin: '10px' }} centered columns={1}>
+          <Segment
+            clearing
+            style={{
+              backgroundColor: 'rgb(7, 20, 38)',
+              border: 'none',
+            }}
+          >
+            {selectedGroup ? (
+              isMember(selectedGroup!) ? (
+                <GroupDetails
+                  group={groupStore.groupsByDate.find(
+                    (group: IGroup) => group.id === selectedGroup
+                  )}
+                />
+              ) : (
+                <GroupSummary
+                  group={groupStore.groupsByDate.find(
+                    (group: IGroup) => group.id === selectedGroup
+                  )}
+                ></GroupSummary>
+              )
             ) : (
-              <GroupSummary
-                group={groupStore.groupsByDate.find(
-                  (group: IGroup) => group.id === selectedGroup
-                )}
-              ></GroupSummary>
-            )
-          ) : (
-            <GroupListExplainer />
-          )}
-        </Segment>
-      </Grid.Row>
-    </Grid>
+              <GroupListExplainer />
+            )}
+          </Segment>
+        </Grid.Row>
+      </Grid>
+    </Segment>
   );
 };
 

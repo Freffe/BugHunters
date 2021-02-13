@@ -26,19 +26,19 @@ const StatusStats: React.FC<IProps> = ({ groupId }) => {
         <Statistic.Value text={true} style={{ minHeight: '0em' }}>
           {groupStats.open}
         </Statistic.Value>
-        <Statistic.Label>Open</Statistic.Label>
+        <Statistic.Label style={{ color: 'white' }}>Open</Statistic.Label>
       </Statistic>
       <Statistic color='green' size='mini'>
         <Statistic.Value text={true} style={{ minHeight: '0em' }}>
           {groupStats.verify}
         </Statistic.Value>
-        <Statistic.Label>Verify</Statistic.Label>
+        <Statistic.Label style={{ color: 'white' }}>Verify</Statistic.Label>
       </Statistic>
       <Statistic color='red' size='mini'>
         <Statistic.Value text={true} style={{ minHeight: '0em' }}>
           {groupStats.closed}
         </Statistic.Value>
-        <Statistic.Label>Closed</Statistic.Label>
+        <Statistic.Label style={{ color: 'white' }}>Closed</Statistic.Label>
       </Statistic>
     </Statistic.Group>
   );

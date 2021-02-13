@@ -1,8 +1,16 @@
-import { formatDistance } from 'date-fns';
+import { formatDistance, formatDistanceStrict } from 'date-fns';
 import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, Comment, Item, Button } from 'semantic-ui-react';
+import {
+  Grid,
+  Comment,
+  Item,
+  Button,
+  Segment,
+  Icon,
+  Container,
+} from 'semantic-ui-react';
 import { IComment } from '../../../app/models/groups';
 import { IUser } from '../../../app/models/user';
 import TicketCommentEdit from './TicketCommentEdit';
@@ -28,7 +36,7 @@ const TicketComment: React.FC<IProps> = ({
 }) => {
   const [isEditComment, setIsEditComment] = useState(false);
   const [isSelectedComment, setIsSelectedComment] = useState('');
-  return comments ? (
+  return comments && comments.length > 0 ? (
     comments?.map((comment: IComment, i: any) => (
       <Grid
         key={comment.id}
@@ -42,7 +50,7 @@ const TicketComment: React.FC<IProps> = ({
           <Grid.Column width={2}>
             <Item.Group>
               <Item style={{ border: '1px solid black' }}>
-                <div
+                <Container
                   style={{
                     justifyContent: 'center',
                     margin: 'auto',
@@ -62,9 +70,15 @@ const TicketComment: React.FC<IProps> = ({
                     {comment.displayName}
                   </Item.Extra>
                   <Item.Meta>
-                    <span className='date'>Joined in 2015</span>
+                    <div style={{ textAlign: 'center' }}>
+                      Member for: <br />
+                      {formatDistanceStrict(
+                        new Date(user!.dateJoined!),
+                        new Date()
+                      )}
+                    </div>
                   </Item.Meta>
-                </div>
+                </Container>
               </Item>
             </Item.Group>
           </Grid.Column>
@@ -135,7 +149,12 @@ const TicketComment: React.FC<IProps> = ({
       </Grid>
     ))
   ) : (
-    <div>Hey</div>
+    <Grid centered style={{ marginBottom: '4px' }}>
+      <Segment placeholder size='large' compact style={{ minHeight: '4px' }}>
+        <Icon name='comment' />
+        This ticket has no comments yet. Feel free to add one!
+      </Segment>
+    </Grid>
   );
 };
 

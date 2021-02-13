@@ -11,7 +11,7 @@ const ProfileGroups = () => {
     groupStore.setSelectedGroup(key);
   };
   return (
-    <Segment clearing>
+    <Segment clearing style={{ border: 'none' }}>
       <List divided relaxed>
         {groupTitleForUser!.map((group) => {
           return (

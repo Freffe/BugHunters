@@ -8,21 +8,20 @@ import {
   Segment,
   Image,
 } from 'semantic-ui-react';
-import TicketDetails from '../Details/TicketDetails';
-import TicketForm from '../Form/TicketForm';
-
 import LoadingComponent from '../../../app/layout/LoadingComponent';
 import { observer } from 'mobx-react-lite';
 import StatusStats from './StatusStats';
 import SearchList from './SearchList';
 import { arrayContains } from '../../utils/helperMethods';
 import { RootStoreContext } from '../../../app/stores/rootStore';
+import { Link } from 'react-router-dom';
+import { IMember } from '../../../app/models/groups';
 
 const tagOptions = [
   {
-    key: 'Open',
+    key: 'open',
     text: 'Open',
-    value: 'Open',
+    value: 'open',
     icon: { color: 'blue', name: 'circle' },
   },
   {
@@ -32,29 +31,45 @@ const tagOptions = [
     icon: { color: 'green', name: 'circle' },
   },
   {
-    key: 'Closed',
+    key: 'closed',
     text: 'Closed',
-    value: 'Closed',
+    value: 'closed',
     icon: { color: 'red', name: 'circle' },
   },
 ];
 
 const TicketList = () => {
   const { ticketStore, groupStore } = useContext(RootStoreContext);
-
-  const [filterStatus, setFilterStatus] = useState('open');
+  const { setSelectedTicket } = ticketStore;
+  const [filterStatus, setFilterStatus] = useState('');
   const [filterGroup, setGroupFilter] = useState('');
   const [searchResultIds, setSearchResultIds] = useState<string[]>([]);
   useEffect(() => {
     ticketStore.loadTickets();
     groupStore.loadGroups();
-  }, [ticketStore, groupStore]);
+  }, [ticketStore, groupStore, setGroupFilter]);
+
+  const groupMemberPhoto = (groupId: string, username: string) => {
+    if (username && groupId) {
+      const members = groupStore.groupRegistry.get(groupId).members;
+      const isFound = members.filter(
+        (member: IMember) => member.username === username
+      );
+
+      if (isFound && isFound[0]) {
+        return isFound[0].image;
+      }
+    }
+    return '/assets/user.png';
+  };
 
   const handleStatusClick = (e: any, data: any) => {
+    if (data.value === '') return;
     const statusValue = data.value.toLowerCase();
 
     if (data.placeholder === 'Filter By Group') {
       setGroupFilter(statusValue);
+      setFilterStatus('');
     } else {
       setFilterStatus(statusValue);
     }
@@ -66,11 +81,13 @@ const TicketList = () => {
   };
 
   if (ticketStore.loadingTickets)
-    return <LoadingComponent content='Loading Tickets' />;
+    return <LoadingComponent content='Loading Tickets...' />;
 
   return (
     <Segment clearing>
-      <Header textAlign='center'>Issues</Header>
+      <Header textAlign='center' style={{ color: 'white' }}>
+        Issues
+      </Header>
 
       <Grid columns={4} divided stackable>
         <Grid.Row>
@@ -79,14 +96,20 @@ const TicketList = () => {
               placeholder='Filter By Group'
               fluid
               selection
-              options={groupStore.groupTitles}
+              options={groupStore.groupTitleForUser}
               onChange={handleStatusClick}
             ></Dropdown>
           </Grid.Column>
           <Grid.Column>
             <Dropdown
+              disabled={
+                filterGroup === '' ||
+                (filterGroup !== '' &&
+                  groupStore.groupRegistry.get(filterGroup).tickets.length <= 0)
+              }
               placeholder='Filter By Ticket Status'
               fluid
+              value={filterStatus}
               selection
               options={tagOptions}
               onChange={handleStatusClick}
@@ -117,16 +140,28 @@ const TicketList = () => {
             (arrayContains(searchResultIds, ticket.id) ||
               searchResultIds.length === 0) && (
               <List.Item key={ticket.id}>
-                <Image avatar src={ticket.image || '/assets/user.png'} />
+                <Image
+                  avatar
+                  src={groupMemberPhoto(filterGroup, ticket.creator)}
+                />
                 <List.Content>
-                  <List.Header as='a'>{ticket.title}</List.Header>
-                  <List.Description as='a'>
+                  <List.Header
+                    as={Link}
+                    to={`/ticket/${ticket.groupId}/${ticket.id}`}
+                    onClick={async () => await setSelectedTicket(ticket)}
+                  >
+                    {ticket.title}
+                  </List.Header>
+                  <List.Description style={{ color: 'white' }}>
                     {ticket.date.replace('T', ' ')}
                   </List.Description>
                 </List.Content>
-                <TicketDetails ticket={ticket} />
-
-                <TicketForm ticket={ticket} />
+                {/*<TicketDetails
+                  ticket={ticket}
+                  isTicketCreatorOrAdmin={ticketStore.isTicketCreatorOrAdmin}
+                  addTextFile={ticketStore.addTextFile}
+                  
+                />*/}
               </List.Item>
             )
           );

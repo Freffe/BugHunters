@@ -4,12 +4,14 @@ import { Button, Form } from 'semantic-ui-react';
 import TextAreaInput from '../../../app/common/form/TextAreaInput';
 import { IProfile } from '../../../app/models/profile';
 import { ITicket } from '../../../app/models/tickets';
+import { IUser } from '../../../app/models/user';
 
 interface IProps {
   isAddingComment: boolean;
   addComment: (...args: any) => Promise<void>;
   ticket?: ITicket;
-  profile: IProfile;
+  profile?: IProfile;
+  user: IUser;
 }
 const required = (value: any) => (value ? undefined : 'Required');
 
@@ -18,21 +20,20 @@ const TicketAddComment: React.FC<IProps> = ({
   isAddingComment,
   ticket,
   profile,
+  user,
 }) => {
   const [shouldComment, setShouldComment] = useState(false);
   return (
-    <div
-      style={{ margin: 'auto', border: '1px solid black', paddingTop: '10px' }}
-    >
+    <div style={{ margin: 'auto', paddingTop: '10px' }}>
       {shouldComment ? (
         <FinalForm
           onSubmit={(val) =>
             addComment(ticket, {
               body: val.body,
-              username: profile.username,
-              displayName: profile.displayName,
+              username: user.username,
+              displayName: user.displayName,
               createdAt: new Date(),
-              image: profile.image,
+              image: user.image,
             })
           }
           render={({ handleSubmit, submitting, form, invalid, pristine }) => (

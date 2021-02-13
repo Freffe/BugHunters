@@ -1,4 +1,4 @@
-import { makeAutoObservable, reaction } from "mobx";
+import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { RootStore } from "./rootStore";
 
 export default class CommonStore {
@@ -27,6 +27,8 @@ export default class CommonStore {
     }
 
     setAppLoaded = () => {
-        this.appLoaded = true;
+        runInAction(() => {
+            this.appLoaded = true;
+        });
     }
 }

@@ -85,7 +85,7 @@ namespace Application.Tickets
                     if (status == "closed")
                         group.Closed -= 1;
                 }
-                group.Open = 0;
+                //Console.WriteLine($"Editing status from {status} to {ticket.Status} and increasing count?");
                 var success = await _context.SaveChangesAsync() > 0;
 
                 if (success) return Unit.Value;

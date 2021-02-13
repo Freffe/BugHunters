@@ -1,8 +1,9 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { Console } from "console";
 import { makeAutoObservable, observable, runInAction  } from "mobx";
 import { createMember } from "../../features/utils/helperMethods";
 import agent from "../api/agent";
-import { IAnnouncement, IComment, IGroup, IMember } from "../models/groups";
+import { IAnnouncement, IGroup, IMember } from "../models/groups";
 import { IPhoto } from "../models/profile";
 import { RootStore } from "./rootStore";
 
@@ -20,6 +21,9 @@ export default class GroupStore {
     selectedGroupId = "";
     loadingGroupPhoto = false;
     deletingGroupPhoto = false;
+    isPromotingMember = false;
+    isUploadingGroupEdit = false;
+
     // Option to not use decorators for setting a ref?
     @observable.ref hubConnection: HubConnection | null = null;
 
@@ -33,7 +37,7 @@ export default class GroupStore {
     
     get isHostOrAdminOfGroup() {
         // If user is host return true:
-        return this.selectedGroup.members.filter((member: IMember) => 
+        return this.selectedGroup?.members.filter((member: IMember) => 
             (member.isHost || member.isAdmin) && member.username === this.rootStore.userStore.user?.username
         ).length > 0;
     }
@@ -60,12 +64,13 @@ export default class GroupStore {
 
     get groupTitleForUser() {
         return Array.from(this.groupRegistry.values())
-            .slice()
-            .sort((a, b) => a.groupName?.charAt(0).localeCompare(b.groupName.charAt(0)))
-            .map((group: IGroup) => 
-                group.members!.filter((member) => 
-                    member.username === this.rootStore.userStore.user?.username  
-                    ) && ({"key": group.id, "value":  group.id, "text": group.groupName,  "photo": group.photos?.slice(0,1)[0] } ));
+        .slice()
+        .sort((a, b) => a.groupName?.charAt(0).localeCompare(b.groupName.charAt(0)))
+        .filter((group: IGroup) => group.members?.filter((member: IMember) => 
+           (member.username === this.rootStore.userStore.user?.username)).length
+        ).map((group: IGroup) => 
+            ({"key": group.id, "value":  group.id, "text": group.groupName,  "photo": group.photos?.slice(0,1)[0] })
+        );
     }
 
     createHubConnection = (groupId: string) => {
@@ -89,7 +94,6 @@ export default class GroupStore {
             // This is being called twice when coming from profile/profileGroups link
 
                 this.hubConnection?.on("ReceiveComment", comment => {
-
                     runInAction(() => {
                         this.selectedGroup!.comments.push(comment);
                     });
@@ -205,6 +209,28 @@ export default class GroupStore {
           console.log(error);
         }
     }
+
+    addAdmin = async (groupId: string, username: string) => {
+        this.isPromotingMember = true;
+        try {
+            let userName = {username: username};
+            await agent.Groups.editMember(groupId, userName);
+            runInAction(() => {
+                this.selectedGroup?.members.forEach((member: IMember) => {
+                    if (member.username === username)
+                        member.isAdmin = true;
+                });
+                console.log("Is he admin? ", this.selectedGroup);
+                this.isPromotingMember = false;
+            })
+        } catch (error) {
+            runInAction(() => {
+                console.log(error);
+                this.isPromotingMember = false;
+            })
+        }
+    }
+
     loadGroups = async () => {
         this.loadingGroups = true;
         try {
@@ -227,7 +253,6 @@ export default class GroupStore {
     createGroup = async (group: IGroup) => {
         this.submittingGroup = true;
         try {
-            console.log("CreateGroup: ", group);
             await agent.Groups.create(group);
             let members = [];
             const member = createMember(this.rootStore.userStore.user!);
@@ -240,11 +265,30 @@ export default class GroupStore {
             runInAction(() => {
                 this.groupRegistry.set(group.id, group);
                 this.submittingGroup = false;
+                this.setSelectedGroup(group.id);
             })
         } catch (error) {
             runInAction(() => {
                 this.submittingGroup = false;
                 console.log("Error in createGroup: ", error);
+            })
+        }
+    }
+
+    editGroupDescription = async (group: IGroup) => {
+        this.isUploadingGroupEdit = true;
+        try {
+            console.log("Sending up: ", group);
+            await agent.Groups.update(group);
+            runInAction(() => {
+                // update groupregistry grp
+                this.groupRegistry.set(group.id, group);
+                this.isUploadingGroupEdit = false;
+            })
+        } catch (error) {
+            runInAction(() => {
+                console.log(error);
+                this.isUploadingGroupEdit = false;
             })
         }
     }

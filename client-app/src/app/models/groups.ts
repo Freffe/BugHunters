@@ -40,3 +40,14 @@ export interface IMember {
     isHost: boolean;
     isAdmin: boolean;
 }
+
+export interface IGroupEdits {
+    description: string
+}
+
+export class GroupDescriptionValues implements IGroupEdits {
+    description = "";
+    constructor(description?: string) {
+        this.description = description!;
+    }
+}

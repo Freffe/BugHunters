@@ -73,6 +73,8 @@ const SearchList: React.FC<IProps> = ({ titleList, handleSearchResults }) => {
     <Grid>
       <Grid.Column width={6}>
         <Search
+          disabled={titleList.length === 0}
+          placeholder='Search title...'
           loading={loading}
           onSearchChange={handleSearchChange}
           value={value}

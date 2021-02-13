@@ -25,18 +25,27 @@ const composeValidators = (...validators: any) => (value: string) =>
     undefined
   );
 
+const paragraphStyles = {
+  size: '8px',
+  color: 'grey',
+  marginBottom: '2px',
+};
+
 const TicketForm: React.FC<any | RouteComponentProps> = ({
   ticket: initialTicketState,
+  setIsEditingTicket,
 }) => {
   const { ticketStore, groupStore } = useContext(RootStoreContext);
-  const { createTicket, editTicket, createWithPhoto } = ticketStore;
+  const {
+    createTicket,
+    editTicket,
+    createWithPhoto,
+    submittingTicket,
+    ticketFiles,
+  } = ticketStore;
   const { groupTitles, loadGroups, loadingGroups } = groupStore;
-  const [ticket, setTicket] = useState<ITicket>(
-    initialTicketState ?? new TicketFormValues()
-  );
-
+  const ticket: ITicket = initialTicketState ?? new TicketFormValues();
   const [files, setFiles] = useState<any[]>([]);
-  const [isImgInFocus, setIsImgInFocus] = useState(false);
 
   useEffect(() => {
     async function loadGroup() {
@@ -44,13 +53,14 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
     }
     loadGroup();
     return () => {
-      files.forEach((file) => URL.revokeObjectURL(file.preview));
+      files.forEach((file: any) => URL.revokeObjectURL(file.preview));
     };
     // Cleanup?
   }, [loadGroups, groupTitles, files]);
 
   const handleFinalFormSubmit = async (values: any) => {
     const createdAtdate = new Date().toISOString();
+
     if (ticket.id.length === 0) {
       let newTicket = {
         ...values,
@@ -59,15 +69,9 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
         // photos: files,
       };
       // Create a ticket with attached photo
-      if (files.length > 0) {
-        let fileToBlob = async (file: any) =>
-          new Blob([new Uint8Array(await file.arrayBuffer())], {
-            type: file.type,
-          });
-
-        let imgage = await fileToBlob(files[0]);
-        //console.log('newTicket: ', imgage);
-        createWithPhoto(newTicket, imgage);
+      if (ticketFiles.length > 0) {
+        // createWithPhoto adds the mobx state variable which holds all files.
+        createWithPhoto(newTicket);
       } else {
         // Create a new ticket
         createTicket(newTicket);
@@ -75,18 +79,20 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
     } else {
       console.log('Editing ticket: ', values);
       // Editing existing ticket.
-      editTicket(values);
+      await editTicket(values);
+      if (!submittingTicket && setIsEditingTicket) setIsEditingTicket(false);
     }
   };
   if (loadingGroups) return <LoadingComponent content='Preparing data...' />;
-  console.log('Files are: ', files);
+  // console.log('Files are: ', files);
   return (
-    <Segment>
+    <Segment fluid='true'>
       <FinalForm
         initialValues={ticket}
         onSubmit={handleFinalFormSubmit}
         render={({ handleSubmit, invalid, pristine }) => (
           <Form onSubmit={handleSubmit}>
+            <p style={paragraphStyles}>Group</p>
             <Field
               validate={required}
               name='groupId'
@@ -95,7 +101,7 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
               value={ticket.groupId}
               component={SelectInput}
             />
-
+            <p style={paragraphStyles}>Title</p>
             <Field
               validate={required}
               name='title'
@@ -103,6 +109,7 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
               value={ticket.title}
               component={TextInput}
             />
+            <p style={paragraphStyles}>Version</p>
             <Field
               validate={required}
               component={TextInput}
@@ -110,6 +117,7 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
               name='version'
               value={ticket.version}
             />
+            <p style={paragraphStyles}>Priority</p>
             <Field
               validate={required}
               component={TextInput}
@@ -117,6 +125,7 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
               name='priority'
               value={ticket.priority}
             />
+            <p style={paragraphStyles}>Device</p>
             <Field
               validate={required}
               component={TextInput}
@@ -124,6 +133,8 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
               name='device'
               value={ticket.device}
             />
+            <p style={paragraphStyles}>Bug type</p>
+
             <Field
               validate={required}
               component={TextInput}
@@ -131,6 +142,8 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
               name='bugType'
               value={ticket.bugType}
             />
+            <p style={paragraphStyles}>Status</p>
+
             <Field
               validate={required}
               component={TextInput}
@@ -138,6 +151,8 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
               name='status'
               value={ticket.status}
             />
+            <p style={paragraphStyles}>Description</p>
+
             <Field
               validate={composeValidators(required, minLength(15))}
               component={TextAreaInput}
@@ -146,7 +161,20 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
               placeholder='Description'
               value={ticket.description}
             />
-            <TicketUploadPhoto setFilesForForm={setFiles} />
+            {!setIsEditingTicket && (
+              <TicketUploadPhoto
+                setFilesForForm={setFiles}
+                isPreview={false}
+                isPhoto={true}
+              />
+            )}
+            {!setIsEditingTicket && (
+              <TicketUploadPhoto
+                setFilesForForm={setFiles}
+                isPreview={false}
+                isPhoto={false}
+              />
+            )}
             <Button
               disabled={ticketStore.submittingTicket || invalid || pristine}
               loading={ticketStore.submittingTicket}

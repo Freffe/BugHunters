@@ -28,7 +28,7 @@ namespace Application.Groups
             {
                 RuleFor(x => x.GroupName).NotEmpty();
                 RuleFor(x => x.Description).NotEmpty();
-                RuleFor(x => x.IsPublic).NotEmpty();
+                RuleFor(x => x.IsPublic).NotNull();
                 RuleFor(x => x.CreatedAt).NotEmpty();
             }
         }

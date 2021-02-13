@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import React, { useContext } from 'react';
-import { Button, Icon, Item } from 'semantic-ui-react';
+import { Button, Divider, Icon, Item } from 'semantic-ui-react';
 import { IGroup } from '../../../app/models/groups';
 import { RootStoreContext } from '../../../app/stores/rootStore';
 
@@ -12,12 +12,9 @@ const GroupSummary: React.FC<IProps> = ({ group }) => {
   const { groupStore } = useContext(RootStoreContext);
   const { joinGroup, submittingGroup } = groupStore;
   const { groupName, description, id } = group;
-  console.log('Yep rendered');
   return (
     <Item.Group
-      divided
       style={{
-        border: '1px solid black',
         margin: '10px',
       }}
     >
@@ -28,22 +25,44 @@ const GroupSummary: React.FC<IProps> = ({ group }) => {
           }}
           verticalAlign='middle'
         >
-          <Item.Header>{groupName}</Item.Header>
+          <Item.Header
+            style={{
+              color: 'white',
+            }}
+          >
+            {groupName}
+          </Item.Header>
         </Item.Content>
       </Item>
-
+      <Divider />
       <Item>
         <Item.Content
           style={{
             margin: '10px',
           }}
         >
-          <Item.Description>Description: {description} </Item.Description>
-          <Item.Description>
+          <Item.Description
+            style={{
+              color: 'white',
+            }}
+          >
+            Description: {description}{' '}
+          </Item.Description>
+          <Item.Description
+            style={{
+              color: 'white',
+            }}
+          >
             Alive since {group.createdAt!.split('T')[0]}
           </Item.Description>
           <Item.Extra>
-            <h4>Issue Status:{'    '} </h4>
+            <h4
+              style={{
+                color: 'white',
+              }}
+            >
+              Issue Status:{'    '}{' '}
+            </h4>
             <Icon color='blue' name='circle'>
               {'    '}
               {group.open}

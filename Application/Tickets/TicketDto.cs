@@ -16,6 +16,7 @@ namespace Application.Tickets
 
         public ICollection<CommentDto> Comments { get; set; }
         public ICollection<Photo> Photos { get; set; }
+        public ICollection<Text> Texts { get; set; }
         public string Status { get; set; }
         public string BugType { get; set; }
         public string Device { get; set; }
@@ -25,6 +26,7 @@ namespace Application.Tickets
         // The ticket.GroupId causes object cycle?!?
         [JsonIgnore]
         public string TicketOwnerId { get; set; }
+        public string Creator { get; set; }
         public Guid? GroupId { get; set; }
     }
 }

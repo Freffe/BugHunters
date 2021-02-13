@@ -1,10 +1,12 @@
-import { group } from 'console';
-import React from 'react';
-import { Image, List, Popup, Dropdown } from 'semantic-ui-react';
+import { observer } from 'mobx-react-lite';
+import React, { useContext, useState } from 'react';
+import { Image, List, Popup, Dropdown, Button } from 'semantic-ui-react';
 import { IMember } from '../../../app/models/groups';
+import { RootStoreContext } from '../../../app/stores/rootStore';
 
 interface IProps {
   members: IMember[];
+  admins: IMember[];
   isHostOrAdmin: boolean;
 }
 
@@ -18,16 +20,42 @@ const getOptions = (members: any) => {
     key: member.username,
     text: member.displayName,
     value: member.username,
-    image: { avatar: false, src: member.image },
+    image: { avatar: true, src: member.image || '/assets/user.png' },
   }));
 };
 
-const GroupAdminsList: React.FC<IProps> = ({ members, isHostOrAdmin }) => {
+const GroupAdminsList: React.FC<IProps> = ({
+  admins,
+  members,
+  isHostOrAdmin,
+}) => {
+  const { groupStore } = useContext(RootStoreContext);
+  const { isPromotingMember, selectedGroupId, addAdmin } = groupStore;
+  const [promotedMember, setPromotedMember] = useState('');
+
+  const handleAdminDropdown = (e: any, data: any) => {
+    const statusValue = data.value.toLowerCase();
+
+    if (data.placeholder === 'Promote') {
+      if (statusValue) setPromotedMember(statusValue);
+    }
+    if (!statusValue) {
+      setPromotedMember('');
+    }
+  };
+
   return (
     <div>
-      <List horizontal relaxed='very' floated='left'>
-        <List.Item>Admins: </List.Item>
-        {members.map((member) => (
+      <List
+        horizontal
+        relaxed='very'
+        floated='left'
+        style={{ marginLeft: '14px' }}
+      >
+        <List.Item>
+          <b>Admins </b>{' '}
+        </List.Item>
+        {admins.map((member) => (
           <List.Item key={member.username}>
             <Popup
               header={member.displayName}
@@ -45,16 +73,39 @@ const GroupAdminsList: React.FC<IProps> = ({ members, isHostOrAdmin }) => {
         ))}
       </List>
       {isHostOrAdmin && (
-        <List horizontal relaxed='very' floated='right'>
-          <List.Item>
+        <List horizontal floated='right'>
+          <List.Item style={{ maxHeight: '32px' }}>
             <Dropdown
-              className='icon'
-              icon='add'
-              style={{ margin: '0px', paddingRight: '3px', paddingTop: '10px' }}
+              style={{
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0,
+                minWidth: '10em',
+              }}
+              clearable
               labeled
               selection
-              placeholder='Promote Member'
+              placeholder='Promote'
               options={getOptions(members)}
+              onChange={handleAdminDropdown}
+            />
+            <Button
+              style={{
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+                height: '38px',
+                paddingTop: '0px',
+                paddingBottom: '0px',
+                marginBottom: '3px',
+                marginRight: '9px',
+              }}
+              loading={isPromotingMember}
+              disabled={promotedMember === ''}
+              size='medium'
+              positive
+              icon='add'
+              onClick={() =>
+                promotedMember && addAdmin(selectedGroupId, promotedMember)
+              }
             />
           </List.Item>
         </List>
@@ -63,4 +114,4 @@ const GroupAdminsList: React.FC<IProps> = ({ members, isHostOrAdmin }) => {
   );
 };
 
-export default GroupAdminsList;
+export default observer(GroupAdminsList);

@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { List, Segment, Image } from 'semantic-ui-react';
 import StatusCircle from '../../app/common/stylings/StatusCircle';
-
+import { format } from 'date-fns';
 import { RootStoreContext } from '../../app/stores/rootStore';
 
 const ProfileTickets = () => {
@@ -12,7 +12,7 @@ const ProfileTickets = () => {
   const { setSelectedTicket } = ticketStore;
 
   return (
-    <Segment clearing>
+    <Segment clearing style={{ border: 'none' }}>
       <List divided relaxed>
         {profile!.tickets.map((ticket) => {
           return (
@@ -24,13 +24,13 @@ const ProfileTickets = () => {
               <List.Content>
                 <List.Header
                   as={Link}
-                  to={`/ticket/${profile!.username}/${ticket.id}`}
+                  to={`/ticket/${ticket.groupId}/${ticket.id}`}
                   onClick={() => setSelectedTicket(ticket)}
                 >
                   {ticket.title}
                 </List.Header>
-                <List.Description as='a'>
-                  {ticket.date.replace('T', ' ')}
+                <List.Description as='a' style={{ color: 'white' }}>
+                  {format(new Date(ticket.date), 'eeee do MMMM')}
                 </List.Description>
               </List.Content>
             </List.Item>

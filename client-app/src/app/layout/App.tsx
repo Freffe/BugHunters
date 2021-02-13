@@ -54,6 +54,10 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
                   path='/ticket/:username/:id'
                   component={TicketFullDetails}
                 />
+                <PrivateRoute
+                  path='/ticket/:groupId/:id'
+                  component={TicketFullDetails}
+                />
                 <PrivateRoute path='/groups' component={GroupList} />
                 <PrivateRoute path='/createTicket' component={TicketForm} />
                 <PrivateRoute path='/profile/:username' component={Profile} />

@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Application.User;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,13 @@ namespace API.Controllers
             var user = await Mediator.Send(new CurrentUser.Query());
             setTokenCookie(user.RefreshToken);
             return user;
+        }
+
+        [HttpDelete("delete/{user}")]
+        public async Task<ActionResult<Unit>> Delete(string user)
+        {
+            Console.WriteLine($"{user}");
+            return await Mediator.Send(new Delete.Command { User = user });
         }
 
         [HttpPost("refreshToken")]

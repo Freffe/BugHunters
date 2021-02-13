@@ -15,6 +15,7 @@ namespace Domain
         //public Bounty Bounty {get; set;}
         public virtual ICollection<Comment> Comments { get; set; }
         public virtual ICollection<Photo> Photos { get; set; }
+        public virtual ICollection<Text> Texts { get; set; }
         public string Status { get; set; }
         public string BugType { get; set; }
         public string Device { get; set; }
@@ -26,6 +27,8 @@ namespace Domain
         public virtual string TicketOwnerId { get; set; }
         // Is this absolutely necessary to be able to get group Detail?
         // The ticket.GroupId causes object cycle?!?
+        [JsonIgnore]
+        public string Creator { get; set; }
         [JsonIgnore]
         public virtual Guid? GroupId { get; set; }
 

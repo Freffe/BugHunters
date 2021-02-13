@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text.Json.Serialization;
 using Application.Interfaces;
@@ -14,10 +15,11 @@ namespace Application.User
             DisplayName = user.DisplayName;
             Token = jwtGenerator.CreateToken(user);
             Username = user.UserName;
-            Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url;
+            Image = user.Photos?.FirstOrDefault(x => x.IsMain)?.Url;
             RefreshToken = refreshToken;
-
+            DateJoined = user.DateJoined;
         }
+        public DateTime DateJoined { get; set; }
         public string DisplayName { get; set; }
         public string Token { get; set; }
         public string Username { get; set; }

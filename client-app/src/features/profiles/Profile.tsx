@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import React, { useContext, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { Grid, Header, Item, Segment, Image } from 'semantic-ui-react';
+import { Grid, Item, Segment } from 'semantic-ui-react';
 import LoadingComponent from '../../app/layout/LoadingComponent';
 import { RootStoreContext } from '../../app/stores/rootStore';
 import ProfileContent from './ProfileContent';
@@ -33,7 +33,13 @@ const Profile: React.FC<IProps> = ({ match }) => {
   return (
     <Grid>
       <Grid.Column width={16}>
-        <Segment>
+        <Segment
+          style={{
+            backgroundColor: 'rgb(7, 20, 38)',
+            borderBottom: '2px solid #bc4123',
+            border: '2px solid #bc4123',
+          }}
+        >
           <Item.Group>
             <Item>
               <Item.Content verticalAlign='top'>

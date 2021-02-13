@@ -40,7 +40,8 @@ namespace Application.Photos
                 var photo = new Photo
                 {
                     Url = photoUploadResult.Url,
-                    Id = photoUploadResult.PublicId
+                    Id = photoUploadResult.PublicId,
+                    Name = photoUploadResult.Name
                 };
 
                 if (!user.Photos.Any(x => x.IsMain))

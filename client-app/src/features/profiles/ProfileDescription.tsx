@@ -15,20 +15,20 @@ const ProfileDescription: React.FC<{
   return (
     <Grid>
       <Grid.Column width={16}>
-        <Header size='huge'>
+        <Header size='huge' style={{ color: 'white' }}>
           <Image fluid rounded src={userImage || '/assets/user.png'} />
           <Header.Content attached='top'>{displayName}</Header.Content>
 
           {isCurrentUser && (
             <Button
               floated='right'
-              basic
+              style={{ color: 'white', backgroundColor: '#bc4123' }}
               content={editMode ? 'Cancel' : 'Edit Profile'}
               onClick={() => setEditMode(!editMode)}
             />
           )}
         </Header>
-        <Item.Description floated='right'>
+        <Item.Description floated='right' style={{ color: 'white' }}>
           {editMode ? (
             <ProfileAbout
               editProfile={editProfile}

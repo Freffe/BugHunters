@@ -45,6 +45,7 @@ namespace Application.Comments
                     Body = request.Body,
                     CreatedAt = DateTime.Now
                 };
+
                 group.Comments.Add(comment);
 
                 var success = await _context.SaveChangesAsync() > 0;

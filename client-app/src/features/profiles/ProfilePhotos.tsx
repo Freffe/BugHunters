@@ -24,20 +24,32 @@ const ProfilePhotos = () => {
     uploadPhoto(photo).then(() => setAddPhotoMode(false));
   };
   return (
-    <Tab.Pane>
+    <Tab.Pane
+      style={{
+        backgroundColor: 'rgb(7, 20, 38)',
+        border: 'none',
+      }}
+    >
       <Grid>
         <Grid.Column width={16} style={{ paddingBottom: 0 }}>
-          <Header icon='image' content='photos' />
+          <Header
+            icon='image'
+            content='photos'
+            style={{ color: 'white', backgroundImage: 'white' }}
+          />
           {isCurrentUser && (
             <Button
               floated='right'
-              basic
+              style={{
+                backgroundColor: '#bc4123',
+                color: 'white',
+              }}
               content={addPhotoMode ? 'Cancel' : 'Add Photo'}
               onClick={() => setAddPhotoMode(!addPhotoMode)}
             />
           )}
         </Grid.Column>
-        <Grid.Column width={16}>
+        <Grid.Column width={16} style={{ color: 'white' }}>
           {addPhotoMode ? (
             <PhotoUploadWidget
               uploadPhoto={handleUploadImage}

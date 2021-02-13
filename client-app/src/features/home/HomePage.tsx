@@ -15,11 +15,7 @@ const HomePage = () => {
       <Container text>
         {isLoggedIn && user && token ? (
           <Fragment>
-            <Header
-              as='h2'
-              inverted
-              content={`Welcome back ${user.displayName}`}
-            />
+            <Header as='h2' inverted content={`Welcome ${user.displayName}`} />
             <Button as={Link} to='/groups' size='huge' inverted>
               Go to groups!
             </Button>
@@ -27,14 +23,25 @@ const HomePage = () => {
         ) : (
           <Fragment>
             <Header as='h2' inverted content='Welcome to Bug hunters!' />
-            <Segment>
+            <Segment
+              style={{
+                backgroundColor: 'rgb(7, 20, 38)',
+                border: '2px solid #bc4123',
+              }}
+            >
               <Tab
                 menu={{ attached: 'bottom' }}
                 panes={[
                   {
                     menuItem: 'Login',
                     render: () => (
-                      <Tab.Pane attached='top'>
+                      <Tab.Pane
+                        attached='top'
+                        style={{
+                          backgroundColor: 'rgb(7, 20, 38)',
+                          border: 'none',
+                        }}
+                      >
                         <LoginForm />
                       </Tab.Pane>
                     ),
@@ -42,7 +49,13 @@ const HomePage = () => {
                   {
                     menuItem: 'Register',
                     render: () => (
-                      <Tab.Pane attached='top'>
+                      <Tab.Pane
+                        attached='top'
+                        style={{
+                          backgroundColor: 'rgb(7, 20, 38)',
+                          border: 'none',
+                        }}
+                      >
                         <RegisterForm />
                       </Tab.Pane>
                     ),
@@ -50,22 +63,6 @@ const HomePage = () => {
                 ]}
               />
             </Segment>
-            <Button
-              onClick={() => console.log('Open Login')}
-              to='/login'
-              size='huge'
-              inverted
-            >
-              Login
-            </Button>
-            <Button
-              onClick={() => console.log('Open Register')}
-              to='/register'
-              size='huge'
-              inverted
-            >
-              Register
-            </Button>
           </Fragment>
         )}
       </Container>

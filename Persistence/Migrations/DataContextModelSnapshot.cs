@@ -59,6 +59,9 @@ namespace Persistence.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<DateTime>("DateJoined")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("DisplayName")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
@@ -195,6 +198,9 @@ namespace Persistence.Migrations
                     b.Property<bool>("IsMain")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
                     b.Property<Guid?>("TicketId")
                         .HasColumnType("char(36)");
 
@@ -237,6 +243,27 @@ namespace Persistence.Migrations
                     b.ToTable("RefreshToken");
                 });
 
+            modelBuilder.Entity("Domain.Text", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<Guid?>("TicketId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketId");
+
+                    b.ToTable("Texts");
+                });
+
             modelBuilder.Entity("Domain.Ticket", b =>
                 {
                     b.Property<Guid>("Id")
@@ -244,6 +271,9 @@ namespace Persistence.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("BugType")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<string>("Creator")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<DateTime>("Date")
@@ -484,6 +514,13 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.AppUser", "AppUser")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("AppUserId");
+                });
+
+            modelBuilder.Entity("Domain.Text", b =>
+                {
+                    b.HasOne("Domain.Ticket", null)
+                        .WithMany("Texts")
+                        .HasForeignKey("TicketId");
                 });
 
             modelBuilder.Entity("Domain.Ticket", b =>

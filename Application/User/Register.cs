@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +25,7 @@ namespace Application.User
             public string Email { get; set; }
             public string Password { get; set; }
             public string Origin { get; set; }
+            public DateTime DateJoined { get; set; }
         }
         public class CommandValidator : AbstractValidator<Command>
         {
@@ -62,8 +65,10 @@ namespace Application.User
                 {
                     DisplayName = request.DisplayName,
                     Email = request.Email,
-                    UserName = request.Username
+                    UserName = request.Username,
+                    DateJoined = request.DateJoined
                 };
+
                 var refreshToken = _jwtGenerator.GenerateRefreshToken();
                 user.RefreshTokens.Add(refreshToken);
                 var result = await _userManager.CreateAsync(user, request.Password);

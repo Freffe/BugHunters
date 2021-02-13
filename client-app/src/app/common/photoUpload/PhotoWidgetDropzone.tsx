@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Header, Icon, Button } from 'semantic-ui-react';
+import { Header, Icon } from 'semantic-ui-react';
 
 interface IProps {
   setFiles: (files: object[]) => void;
@@ -64,7 +64,7 @@ const PhotoWidgetDropzone: React.FC<IProps> = ({
       ) : (
         <>
           <Icon name='upload' size='huge' />
-          <Header content='Drop image here' />
+          <Header content='Drop image here' style={{ color: 'teal' }} />
         </>
       )}
     </div>

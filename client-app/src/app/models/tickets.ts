@@ -13,6 +13,8 @@ export interface ITicket {
     groupId?: string;
     photos?: ITicketPhoto[];
     comments?: IComment[];
+    creator: string;
+    texts?: ITicketText[];
 }
 
 export class TicketFormValues implements ITicket {
@@ -28,6 +30,8 @@ export class TicketFormValues implements ITicket {
     groupId?: string = '';
     photos?: ITicketPhoto[];
     comments?: IComment[];
+    creator: string = "";
+    texts?: ITicketText[];
     
     constructor(init?: TicketFormValues) {
         Object.assign(this, init);
@@ -37,4 +41,13 @@ export class TicketFormValues implements ITicket {
 export interface ITicketPhoto {
     id: string;
     url: string;
+    preview?: string;
+    name: string;
+}
+
+export interface ITicketText {
+    id: string;
+    url: string;
+    name: string;
+    preview?: string;
 }

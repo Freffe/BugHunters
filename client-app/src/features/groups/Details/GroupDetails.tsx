@@ -1,21 +1,14 @@
 import { observer } from 'mobx-react-lite';
 import React, { useContext, useEffect, useState } from 'react';
-import {
-  Button,
-  Divider,
-  Item,
-  Segment,
-  Image,
-  Header,
-  Grid,
-  Popup,
-} from 'semantic-ui-react';
+import { Button, Divider, Item, Segment } from 'semantic-ui-react';
 
 import { IGroup, IMember } from '../../../app/models/groups';
 import { RootStoreContext } from '../../../app/stores/rootStore';
 import GroupAdminsList from './GroupAdminsList';
 import GroupAnnouncement from './GroupAnnouncement';
+import GroupAnnouncementTest from './GroupAnnouncement';
 import GroupClickToComment from './GroupClickToComment';
+import GroupDescriptionEdit from './GroupDescriptionEdit';
 import GroupDetailedChatFlow from './GroupDetailedChatFlow';
 import GroupDetailsFooter from './GroupDetailsFooter';
 import GroupDetailsHeader from './GroupDetailsHeader';
@@ -40,10 +33,14 @@ const GroupDetails: React.FC<IProps> = ({ group }) => {
     submittingAnnouncement,
     uploadPhoto,
     deletePhoto,
+    editGroupDescription,
+    isUploadingGroupEdit,
     loadingGroupPhoto,
     deletingGroupPhoto,
+    selectedGroup,
   } = groupStore;
   const [isAddingPhoto, setIsAddingPhoto] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
   // Clean up when grouplist -> chat works.
   useEffect(() => {
     console.log('GroupDetails called');
@@ -53,12 +50,25 @@ const GroupDetails: React.FC<IProps> = ({ group }) => {
     };
   }, [createHubConnection, selectedGroupId, stopHubConnection]);
 
+  const handleFinalFormSubmit = async (values: any) => {
+    try {
+      //await editProfile(values);
+      const newGroup = selectedGroup;
+      newGroup.description = values.description;
+      await editGroupDescription(newGroup);
+      setIsEditingDescription(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Item.Group
       divided
       style={{
-        border: '1px solid black',
         margin: '10px',
+        backgroundColor: 'rgb(7, 20, 38) ',
+        border: '1px solidrgba(255,255,255,0.4)',
       }}
     >
       <Item>
@@ -89,8 +99,41 @@ const GroupDetails: React.FC<IProps> = ({ group }) => {
                 isAddingPhoto={isAddingPhoto}
               />
 
-              <Segment clearing>
-                <Item.Description>{description} </Item.Description>
+              <Segment
+                clearing
+                style={{
+                  backgroundColor: 'rgb(7, 20, 38)',
+                  color: 'white',
+                  border: 'none',
+                }}
+              >
+                {isEditingDescription ? (
+                  <div>
+                    <GroupDescriptionEdit
+                      handleFinalFormSubmit={handleFinalFormSubmit}
+                      description={description}
+                      isUploadingGroupEdit={isUploadingGroupEdit}
+                    />
+                    <Button
+                      floated='right'
+                      icon='cancel'
+                      onClick={() => setIsEditingDescription(false)}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <Item.Description style={{ whiteSpace: 'pre-wrap' }}>
+                      {description}{' '}
+                    </Item.Description>
+                    {isHostOrAdminOfGroup && (
+                      <Button
+                        floated='right'
+                        icon='edit'
+                        onClick={() => setIsEditingDescription(true)}
+                      />
+                    )}
+                  </>
+                )}
               </Segment>
               {isHostOrAdminOfGroup && isAddingPhoto && (
                 <GroupUploadPhoto
@@ -101,10 +144,23 @@ const GroupDetails: React.FC<IProps> = ({ group }) => {
                 />
               )}
               <Item.Description>
-                <Segment clearing attached secondary style={{ padding: '6px' }}>
+                <Segment
+                  clearing
+                  attached
+                  style={{
+                    padding: '6px',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    backgroundColor: 'rgb(7, 20, 38)',
+                    color: 'white',
+                  }}
+                >
                   <GroupAdminsList
-                    members={members!.filter(
+                    admins={members!.filter(
                       (member: IMember) => member.isAdmin || member.isHost
+                    )}
+                    members={members!.filter(
+                      (member: IMember) => !member.isAdmin && !member.isHost
                     )}
                     isHostOrAdmin={isHostOrAdminOfGroup}
                   />

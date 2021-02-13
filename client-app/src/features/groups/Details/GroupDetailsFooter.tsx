@@ -17,7 +17,7 @@ const dotStyles = {
 
 const GroupDetailsFooter: React.FC<IProps> = ({ group }) => {
   return (
-    <div>
+    <div style={{ backgroundColor: 'rgb(7, 20, 38)', color: 'white' }}>
       <List horizontal floated='left'>
         <List.Item>Alive since {group.createdAt!.split('T')[0]}</List.Item>
         <List.Item>

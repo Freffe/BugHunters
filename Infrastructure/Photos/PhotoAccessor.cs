@@ -1,4 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Net;
+using Application.Errors;
 using Application.Interfaces;
 using Application.Photos;
 using CloudinaryDotNet;
@@ -11,6 +15,10 @@ namespace Infrastructure.Photos
     public class PhotoAccessor : IPhotoAccessor
     {
 
+        private const int FILESIZE = 500000;
+        private static readonly IList<String> FILETYPES = new ReadOnlyCollection<string>
+            (new List<String> {
+         "image/jpeg", "image/png", "image.jpg" });
         private readonly Cloudinary _cloudinary;
         // For strongly typed access to user secrets
         public PhotoAccessor(IOptions<CloudinarySettings> config)
@@ -26,6 +34,10 @@ namespace Infrastructure.Photos
 
         public PhotoUploadResult AddPhoto(IFormFile file)
         {
+            if (file.Length >= FILESIZE || !(FILETYPES.Contains(file.ContentType)))
+            {
+                throw new RestException(HttpStatusCode.BadRequest, new { Photo = "Bad photo size or format." });
+            }
             var uploadResult = new ImageUploadResult();
 
             if (file.Length > 0)
@@ -47,7 +59,8 @@ namespace Infrastructure.Photos
             return new PhotoUploadResult
             {
                 PublicId = uploadResult.PublicId,
-                Url = uploadResult.SecureUrl.AbsoluteUri
+                Url = uploadResult.SecureUrl.AbsoluteUri,
+                Name = file.Name
             };
         }
 
