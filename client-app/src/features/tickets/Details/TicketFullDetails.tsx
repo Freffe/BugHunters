@@ -1,6 +1,6 @@
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   List,
@@ -15,7 +15,7 @@ import {
 import StatusCircle from '../../../app/common/stylings/StatusCircle';
 import LoadingComponent from '../../../app/layout/LoadingComponent';
 import { ITicket } from '../../../app/models/tickets';
-import { RootStoreContext } from '../../../app/stores/rootStore';
+import { useStore } from '../../../app/stores/store';
 import TicketForm from '../Form/TicketForm';
 import TicketAddComment from './TicketAddComment';
 import TicketComment from './TicketComment';
@@ -29,7 +29,7 @@ interface RouteParams {
 interface IProps extends RouteComponentProps<RouteParams> {}
 
 const TicketFullDetails: React.FC<IProps> = ({ match }) => {
-  const { profileStore, ticketStore, userStore } = useContext(RootStoreContext);
+  const { profileStore, ticketStore, userStore } = useStore();
   const { loadProfile, loadingProfile, profile } = profileStore;
   const { user } = userStore;
   const {

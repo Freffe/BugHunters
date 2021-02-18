@@ -1,13 +1,13 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { List, Segment, Image } from 'semantic-ui-react';
 import StatusCircle from '../../app/common/stylings/StatusCircle';
 import { format } from 'date-fns';
-import { RootStoreContext } from '../../app/stores/rootStore';
+import { useStore } from '../../app/stores/store';
 
 const ProfileTickets = () => {
-  const { profileStore, ticketStore } = useContext(RootStoreContext);
+  const { profileStore, ticketStore } = useStore();
   const { profile } = profileStore;
   const { setSelectedTicket } = ticketStore;
 

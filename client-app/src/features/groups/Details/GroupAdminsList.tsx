@@ -1,8 +1,9 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Image, List, Popup, Dropdown, Button } from 'semantic-ui-react';
 import { IMember } from '../../../app/models/groups';
-import { RootStoreContext } from '../../../app/stores/rootStore';
+
+import { useStore } from '../../../app/stores/store';
 
 interface IProps {
   members: IMember[];
@@ -29,7 +30,7 @@ const GroupAdminsList: React.FC<IProps> = ({
   members,
   isHostOrAdmin,
 }) => {
-  const { groupStore } = useContext(RootStoreContext);
+  const { groupStore } = useStore();
   const { isPromotingMember, selectedGroupId, addAdmin } = groupStore;
   const [promotedMember, setPromotedMember] = useState('');
 

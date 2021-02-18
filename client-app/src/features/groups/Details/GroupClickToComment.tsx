@@ -1,15 +1,16 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Form, Comment, Button } from 'semantic-ui-react';
 import { Field, Form as FinalForm } from 'react-final-form';
 import TextAreaInput from '../../../app/common/form/TextAreaInput';
-import { RootStoreContext } from '../../../app/stores/rootStore';
+
 import { observer } from 'mobx-react-lite';
 import { v4 as uuid } from 'uuid';
+import { useStore } from '../../../app/stores/store';
 
 const GroupClickToComment: React.FC<{ isAnnouncement: boolean }> = ({
   isAnnouncement,
 }) => {
-  const { groupStore, userStore } = useContext(RootStoreContext);
+  const { groupStore, userStore } = useStore();
   const [shouldComment, setShouldComment] = useState(false);
 
   const submitAnnouncement = async (val: any) => {

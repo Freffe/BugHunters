@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Form, Segment } from 'semantic-ui-react';
 import { ITicket, TicketFormValues } from '../../../app/models/tickets';
 import { v4 as uuid } from 'uuid';
@@ -7,11 +7,11 @@ import { Form as FinalForm, Field } from 'react-final-form';
 import TextInput from '../../../app/common/form/TextInput';
 import TextAreaInput from '../../../app/common/form/TextAreaInput';
 import SelectInput from '../../../app/common/form/SelectInput';
-import { RootStoreContext } from '../../../app/stores/rootStore';
 import { RouteComponentProps } from 'react-router-dom';
 import LoadingComponent from '../../../app/layout/LoadingComponent';
 
 import TicketUploadPhoto from './TicketUploadPhoto';
+import { useStore } from '../../../app/stores/store';
 
 // requirement fields for validation in form.
 const required = (value: any) => (value ? undefined : 'Required');
@@ -35,7 +35,7 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
   ticket: initialTicketState,
   setIsEditingTicket,
 }) => {
-  const { ticketStore, groupStore } = useContext(RootStoreContext);
+  const { ticketStore, groupStore } = useStore();
   const {
     createTicket,
     editTicket,
@@ -162,18 +162,10 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
               value={ticket.description}
             />
             {!setIsEditingTicket && (
-              <TicketUploadPhoto
-                setFilesForForm={setFiles}
-                isPreview={false}
-                isPhoto={true}
-              />
+              <TicketUploadPhoto isPreview={false} isPhoto={true} />
             )}
             {!setIsEditingTicket && (
-              <TicketUploadPhoto
-                setFilesForForm={setFiles}
-                isPreview={false}
-                isPhoto={false}
-              />
+              <TicketUploadPhoto isPreview={false} isPhoto={false} />
             )}
             <Button
               disabled={ticketStore.submittingTicket || invalid || pristine}

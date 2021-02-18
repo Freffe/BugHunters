@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { Button, Grid, Header, Image, Item } from 'semantic-ui-react';
-import { RootStoreContext } from '../../app/stores/rootStore';
+import { useStore } from '../../app/stores/store';
 import ProfileAbout from './ProfileAbout';
 
 const ProfileDescription: React.FC<{
@@ -8,8 +8,8 @@ const ProfileDescription: React.FC<{
   displayName: string;
   userImage?: string;
 }> = ({ description, displayName, userImage }) => {
-  const rootStore = useContext(RootStoreContext);
-  const { isCurrentUser, editProfile, profile } = rootStore.profileStore;
+  const { profileStore } = useStore();
+  const { isCurrentUser, editProfile, profile } = profileStore;
   const [editMode, setEditMode] = useState(false);
 
   return (

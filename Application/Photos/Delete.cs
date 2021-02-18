@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
 using MediatR;
@@ -13,12 +14,12 @@ namespace Application.Photos
 {
     public class Delete
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public string Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             private readonly IUserAccessor _userAccessor;
@@ -30,31 +31,28 @@ namespace Application.Photos
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 // handler logic
                 var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
 
                 var photo = user.Photos.FirstOrDefault(x => x.Id == request.Id);
 
-                if (photo == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Photo = "Not found" });
-
-                if (photo.IsMain)
-                    throw new RestException(HttpStatusCode.BadRequest, new { Photo = "You cannot delete your main photo" });
+                if (photo == null || photo.IsMain)
+                    return null;
 
                 var result = _photoAccessor.DeletePhoto(photo.Id);
 
                 if (result == null)
-                    throw new Exception("Problem deleting the photo");
+                    return null;
 
                 user.Photos.Remove(photo);
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Failed deleting photo.");
 
-                throw new Exception("Problem saving changes");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Comments;
+using Application.Core;
 using Application.Errors;
 using AutoMapper;
 using Domain;
@@ -15,7 +16,7 @@ namespace Application.Tickets
 {
     public class AddComment
     {
-        public class Command : IRequest<CommentDto>
+        public class Command : IRequest<Result<CommentDto>>
         {
             public string Body { get; set; }
             public Guid Id { get; set; }
@@ -28,7 +29,7 @@ namespace Application.Tickets
                 RuleFor(x => x.Body).NotEmpty();
             }
         }
-        public class Handler : IRequestHandler<Command, CommentDto>
+        public class Handler : IRequestHandler<Command, Result<CommentDto>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -38,20 +39,20 @@ namespace Application.Tickets
                 _mapper = mapper;
             }
 
-            public async Task<CommentDto> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<CommentDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                // Get Ticket
+
                 var ticket = await _context.Tickets.FindAsync(request.Id);
                 if (ticket == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Ticket = "Not Found" });
+                    return null;
 
-                // Get group
                 var group = await _context.Groups.FindAsync(ticket.GroupId);
                 if (group == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Group = "Not Found" });
+                    return null;
 
-                // Get user
                 var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == request.Username);
+                if (user == null)
+                    return null;
 
                 var comment = new Comment
                 {
@@ -65,9 +66,10 @@ namespace Application.Tickets
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return _mapper.Map<CommentDto>(comment); ;
+                if (!success) return Result<CommentDto>.Failure("Failed to add comment.");
+                var commentDto = _mapper.Map<CommentDto>(comment);
 
-                throw new Exception("Problem saving changes ");
+                return Result<CommentDto>.Success(commentDto);
             }
         }
     }

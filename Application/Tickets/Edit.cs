@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using FluentValidation;
 using MediatR;
@@ -11,7 +12,7 @@ namespace Application.Tickets
 {
     public class Edit
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Guid Id { get; set; }
             public string Title { get; set; }
@@ -36,7 +37,7 @@ namespace Application.Tickets
                 RuleFor(x => x.Device).NotEmpty();
             }
         }
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             public Handler(DataContext context)
@@ -44,16 +45,16 @@ namespace Application.Tickets
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var ticket = await _context.Tickets.FindAsync(request.Id);
 
                 if (ticket == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { ticket = "Not found" });
+                    return null;
 
                 var group = await _context.Groups.FindAsync(ticket.GroupId);
                 if (group == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { group = "Group not found!" });
+                    return null;
 
                 var status = ticket.Status.ToLower();
 
@@ -88,9 +89,9 @@ namespace Application.Tickets
                 //Console.WriteLine($"Editing status from {status} to {ticket.Status} and increasing count?");
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Failed to update ticket.");
 
-                throw new Exception("Problem saving changes Edit");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

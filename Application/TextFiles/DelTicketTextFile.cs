@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
 using MediatR;
@@ -13,13 +14,13 @@ namespace Application.TextFiles
 {
     public class DelTicketTextFile
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Guid TicketId { get; set; }
             public string Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             private readonly ITextFileAccessor _textFileAccessor;
@@ -29,32 +30,29 @@ namespace Application.TextFiles
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 // handler logic
                 var ticket = await _context.Tickets.SingleOrDefaultAsync(x => x.Id == request.TicketId);
                 if (ticket == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Ticket = "Not found" });
+                    return null;
 
                 var text = ticket.Texts.FirstOrDefault(x => x.Id == request.Id);
                 if (text == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Text = "Not found" });
-
-                //if (photo.IsMain)
-                // throw new RestException(HttpStatusCode.BadRequest, new { Photo = "You cannot delete your main photo" });
+                    return null;
 
                 var result = _textFileAccessor.DeleteTextFile(text.Id);
 
                 if (result == null)
-                    throw new Exception("Problem deleting the text file");
+                    return null;
 
                 ticket.Texts.Remove(text);
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Failed deleting text file.");
 
-                throw new Exception("Problem saving changes");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

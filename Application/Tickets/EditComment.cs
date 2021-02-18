@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using FluentValidation;
 using MediatR;
@@ -12,7 +13,7 @@ namespace Application.Tickets
 {
     public class EditComment
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Guid TicketId { get; set; }
             public Guid CommentId { get; set; }
@@ -29,7 +30,7 @@ namespace Application.Tickets
                 RuleFor(x => x.Body).NotEmpty();
             }
         }
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             public Handler(DataContext context)
@@ -37,16 +38,16 @@ namespace Application.Tickets
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var ticket = await _context.Tickets.FindAsync(request.TicketId);
                 if (ticket == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Ticket = "Not found" });
+                    return null;
 
                 // Get comment
                 var comment = ticket.Comments.FirstOrDefault(x => x.Id == request.CommentId);
                 if (comment == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Comment = "Not found" });
+                    return null;
 
                 // Update this comment
                 comment.Body = request.Body ?? comment.Body;
@@ -54,9 +55,9 @@ namespace Application.Tickets
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Failed to update comment.");
 
-                throw new Exception("Problem Updating that ticket comment.");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Comments;
+using Application.Core;
 using Application.Errors;
 using AutoMapper;
 using Domain;
@@ -14,14 +15,14 @@ namespace Application.Groups
 {
     public class AddAnnouncement
     {
-        public class Command : IRequest<AnnouncementDto>
+        public class Command : IRequest<Result<AnnouncementDto>>
         {
             public string Body { get; set; }
             public Guid Id { get; set; }
             public string Username { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command, AnnouncementDto>
+        public class Handler : IRequestHandler<Command, Result<AnnouncementDto>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -31,15 +32,15 @@ namespace Application.Groups
                 _mapper = mapper;
             }
 
-            public async Task<AnnouncementDto> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<AnnouncementDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                // Get Group
                 var group = await _context.Groups.FindAsync(request.Id);
                 if (group == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Group = "Not Found" });
+                    return null;
 
-                // Get user
                 var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == request.Username);
+                if (user == null)
+                    return null;
 
                 var announcement = new Announcement
                 {
@@ -53,9 +54,11 @@ namespace Application.Groups
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return _mapper.Map<AnnouncementDto>(announcement); ;
+                if (!success) return Result<AnnouncementDto>.Failure("Failed to add announcement.");
 
-                throw new Exception("Problem saving changes ");
+                var mappedAnnouncement = _mapper.Map<AnnouncementDto>(announcement); ;
+                return Result<AnnouncementDto>.Success(mappedAnnouncement);
+
             }
         }
     }

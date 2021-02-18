@@ -2,13 +2,14 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { history } from "../..";
 import agent from "../api/agent";
 import { IUser, IUserFormValues } from "../models/user";
-import { RootStore } from "./rootStore";
+
+import { store } from "./store";
 
 export default class UserStore {
     refreshTokenTimeout: any;
-    rootStore: RootStore;
-    constructor(rootStore: RootStore) {
-      this.rootStore = rootStore;
+ 
+    constructor() {
+ 
       makeAutoObservable(this);
     }
     user: IUser | null = null;
@@ -21,7 +22,8 @@ export default class UserStore {
             runInAction(() => {
                 this.user = user;
             });
-            this.rootStore.commonStore.setToken(user.token);
+            // *this.rootStore.commonStore.setToken(user.token);
+            store.commonStore.setToken(user.token);
             this.startRefreshTokenTimer(user);
             //this.rootStore.modalStore.closeModal();
             history.push("/groups");
@@ -32,7 +34,8 @@ export default class UserStore {
     }
 
     logout = () => {
-        this.rootStore.commonStore.setToken(null);
+        // *this.rootStore.commonStore.setToken(null);
+        store.commonStore.setToken(null);
         this.user = null;
         history.push("/");
     }
@@ -43,7 +46,8 @@ export default class UserStore {
             runInAction(() => {
                 this.user = user;
             });
-            this.rootStore.commonStore.setToken(user.token);
+            // *this.rootStore.commonStore.setToken(user.token);
+            store.commonStore.setToken(user.token);
             this.startRefreshTokenTimer(user);
         } catch(error)
         {
@@ -58,7 +62,8 @@ export default class UserStore {
             runInAction(() => {
                 this.user = user;
             });
-            this.rootStore.commonStore.setToken(user.token);
+            // *this.rootStore.commonStore.setToken(user.token);
+            store.commonStore.setToken(user.token);
             this.startRefreshTokenTimer(user);
             //this.rootStore.modalStore.closeModal();
             //history.push(`/user/registerSuccess?email=${values.email}`);
@@ -91,7 +96,8 @@ export default class UserStore {
             runInAction(() => {
                 this.user = user;
             })
-            this.rootStore.commonStore.setToken(user.token);
+            // *this.rootStore.commonStore.setToken(user.token);
+            store.commonStore.setToken(user.token);
             this.startRefreshTokenTimer(user);
         } catch( error ) {
             console.log(error);

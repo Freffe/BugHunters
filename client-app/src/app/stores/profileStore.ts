@@ -1,12 +1,12 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import agent from "../api/agent";
 import { IPhoto, IProfile, IProfileEdits } from "../models/profile";
-import { RootStore } from "./rootStore";
+
+import { store } from "./store";
 
 export default class ProfileStore {
-    rootStore: RootStore;
-    constructor(rootStore: RootStore) {
-        this.rootStore = rootStore;
+    
+    constructor() {
         makeAutoObservable(this);
     }
 
@@ -17,8 +17,11 @@ export default class ProfileStore {
     loadingProfileUpdate = false;
 
     get isCurrentUser() {
-        if (this.rootStore.userStore.user && this.profile) {
+        /* *if (this.rootStore.userStore.user && this.profile) {
             return this.rootStore.userStore.user.username === this.profile.username;
+        } */
+        if (store.userStore.user && this.profile) {
+            return store.userStore.user.username === this.profile.username;
         }
         return false;
     }
@@ -48,7 +51,8 @@ export default class ProfileStore {
             runInAction(() => {
                 this.profile!.displayName = profile.displayName;
                 this.profile!.bio = profile.bio!;
-                this.rootStore.userStore.user!.displayName = profile.displayName; 
+                // *this.rootStore.userStore.user!.displayName = profile.displayName; 
+                store.userStore.user!.displayName = profile.displayName; 
                 this.loadingProfileUpdate = false;
             })
         } catch(error) {
@@ -67,8 +71,12 @@ export default class ProfileStore {
             runInAction(() => {
                 if (this.profile) {
                     this.profile.photos.push(photo);
-                    if (photo.isMain && this.rootStore.userStore.user) {
+                    /* *if (photo.isMain && this.rootStore.userStore.user) {
                         this.rootStore.userStore.user.image = photo.url;
+                        this.profile.image = photo.url
+                    } */
+                    if (photo.isMain && store.userStore.user) {
+                        store.userStore.user.image = photo.url;
                         this.profile.image = photo.url
                     }
                 }
@@ -88,7 +96,8 @@ export default class ProfileStore {
         try {
             await agent.Profiles.setMainPhoto(photo.id);
             runInAction(() => {
-                this.rootStore.userStore.user!.image = photo.url;
+                // *this.rootStore.userStore.user!.image = photo.url;
+                store.userStore.user!.image = photo.url;
                 this.profile!.photos.find(p => p.isMain)!.isMain = false;
                 this.profile!.photos.find(p => p.id === photo.id)!.isMain = true;
                 this.profile!.image = photo.url;

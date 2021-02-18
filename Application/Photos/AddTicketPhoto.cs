@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
 using Domain;
@@ -16,13 +17,13 @@ namespace Application.Photos
     public class AddTicketPhoto
     {
 
-        public class Command : IRequest<Photo>
+        public class Command : IRequest<Result<Photo>>
         {
             public IFormFile File { get; set; }
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command, Photo>
+        public class Handler : IRequestHandler<Command, Result<Photo>>
         {
             private readonly DataContext _context;
             private readonly IPhotoAccessor _photoAccessor;
@@ -32,15 +33,13 @@ namespace Application.Photos
                 _context = context;
             }
 
-            public async Task<Photo> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Photo>> Handle(Command request, CancellationToken cancellationToken)
             {
-                // handler logic
-
                 var photoUploadResult = _photoAccessor.AddPhoto(request.File);
 
                 var ticket = await _context.Tickets.SingleOrDefaultAsync(x => x.Id == request.Id);
                 if (ticket == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Ticket = "Not found" });
+                    return null;
 
                 var photo = new Photo
                 {
@@ -56,9 +55,9 @@ namespace Application.Photos
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return photo;
+                if (!success) return Result<Photo>.Failure("Failed adding photo.");
 
-                throw new Exception("Problem saving changes in AddTicketPhoto.cs");
+                return Result<Photo>.Success(photo);
             }
         }
     }

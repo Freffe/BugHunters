@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
 using Domain;
@@ -14,13 +15,13 @@ namespace Application.TextFiles
 {
     public class AddTicketTextFile
     {
-        public class Command : IRequest<Text>
+        public class Command : IRequest<Result<Text>>
         {
             public IFormFile File { get; set; }
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command, Text>
+        public class Handler : IRequestHandler<Command, Result<Text>>
         {
             private readonly DataContext _context;
             private readonly ITextFileAccessor _textFileAccessor;
@@ -30,14 +31,14 @@ namespace Application.TextFiles
                 _context = context;
             }
 
-            public async Task<Text> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Text>> Handle(Command request, CancellationToken cancellationToken)
             {
 
                 var textFileUploadResult = _textFileAccessor.AddTextFile(request.File);
 
                 var ticket = await _context.Tickets.SingleOrDefaultAsync(x => x.Id == request.Id);
                 if (ticket == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Ticket = "Not found" });
+                    return null;
 
                 var text = new Text
                 {
@@ -51,9 +52,9 @@ namespace Application.TextFiles
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return text;
+                if (!success) return Result<Text>.Failure("Failed to add text file.");
 
-                throw new Exception("Problem saving changes in AddTicketTextFile.cs");
+                return Result<Text>.Success(text);
             }
         }
     }

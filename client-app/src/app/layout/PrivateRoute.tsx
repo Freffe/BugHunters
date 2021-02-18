@@ -1,20 +1,20 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext } from 'react';
+import React from 'react';
 import {
   Redirect,
   Route,
   RouteComponentProps,
   RouteProps,
 } from 'react-router-dom';
-import { RootStoreContext } from '../stores/rootStore';
+import { useStore } from '../stores/store';
 
 interface IProps extends RouteProps {
   component: React.ComponentType<RouteComponentProps<any>>;
 }
 
 const PrivateRoute: React.FC<IProps> = ({ component: Component, ...rest }) => {
-  const rootStore = useContext(RootStoreContext);
-  const { isLoggedIn } = rootStore.userStore;
+  const { userStore } = useStore();
+  const { isLoggedIn } = userStore;
   return (
     <Route
       {...rest}

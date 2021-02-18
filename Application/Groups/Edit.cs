@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using FluentValidation;
 using MediatR;
@@ -11,7 +12,7 @@ namespace Application.Groups
 {
     public class Edit
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Guid Id { get; set; }
             public string GroupName { get; set; }
@@ -34,7 +35,7 @@ namespace Application.Groups
                 RuleFor(x => x.CreatedAt).NotEmpty();
             }
         }
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             public Handler(DataContext context)
@@ -42,12 +43,12 @@ namespace Application.Groups
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var group = await _context.Groups.FindAsync(request.Id);
 
                 if (group == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { group = "Not found" });
+                    return null;
 
                 group.GroupName = request.GroupName ?? group.GroupName;
                 group.Description = request.Description ?? group.Description;
@@ -60,9 +61,9 @@ namespace Application.Groups
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Problem updating group.");
 
-                throw new Exception("Problem saving changes Edit");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

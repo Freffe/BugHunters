@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
 using Domain;
@@ -15,7 +16,7 @@ namespace Application.User
 {
     public class Delete
     {
-        public class Command : IRequest<Unit>
+        public class Command : IRequest<Result<Unit>>
         {
 
             public string User { get; set; }
@@ -29,7 +30,7 @@ namespace Application.User
             }
         }
 
-        public class Handler : IRequestHandler<Command, Unit>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly SignInManager<AppUser> _signInManager;
@@ -53,16 +54,15 @@ namespace Application.User
                 }
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 // Handler logic
                 // Bob@test.com will crash, 2 users with same mail.
 
                 var user = await _userManager.FindByNameAsync(request.User);
                 if (user == null)
-                {
-                    throw new RestException(HttpStatusCode.Unauthorized);
-                }
+                    return null;
+
                 var result = await _context.Users.AnyAsync(x => x.UserName == request.User);
 
                 var currentUser = _userAccessor.GetCurrentUsername();
@@ -82,10 +82,12 @@ namespace Application.User
                     var res = await _userManager.DeleteAsync(user);
 
                     //_context.Users.Remove(user);
-                    if (res.Succeeded) return Unit.Value;
+                    if (!res.Succeeded) return Result<Unit>.Failure("Failed deleting user!");
+
+                    return Result<Unit>.Success(Unit.Value);
                 }
 
-                throw new RestException(HttpStatusCode.BadRequest);
+                return Result<Unit>.Failure("Failed deleting user!");
             }
         }
 

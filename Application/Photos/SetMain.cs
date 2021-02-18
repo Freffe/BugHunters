@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
 using MediatR;
@@ -13,12 +14,12 @@ namespace Application.Photos
 {
     public class SetMain
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public string Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             private readonly IUserAccessor _userAccessor;
@@ -28,14 +29,14 @@ namespace Application.Photos
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
 
                 var photo = user.Photos.FirstOrDefault(x => x.Id == request.Id);
 
                 if (photo == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Photo = "Not Found " });
+                    return null;
 
                 var currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
 
@@ -45,9 +46,9 @@ namespace Application.Photos
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Failed setting photo.");
 
-                throw new Exception("Problem saving changes in Create.cs");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

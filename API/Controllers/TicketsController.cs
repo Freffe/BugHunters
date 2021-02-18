@@ -14,61 +14,61 @@ namespace API.Controllers
     {
 
         [HttpGet]
-        public async Task<ActionResult<List<TicketDto>>> List()
+        public async Task<IActionResult> List()
         {
-            return await Mediator.Send(new List.Query());
+            return HandleResult(await Mediator.Send(new List.Query()));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<TicketDto>> Details(Guid id)
+        public async Task<IActionResult> Details(Guid id)
         {
-            return await Mediator.Send(new Details.Query { Id = id });
+            return HandleResult(await Mediator.Send(new Details.Query { Id = id }));
         }
 
         [HttpPost]
-        public async Task<ActionResult<Unit>> Create(Application.Tickets.Create.Command command)
+        public async Task<IActionResult> Create(Application.Tickets.Create.Command command)
         {
-            return await Mediator.Send(command);
+            return HandleResult(await Mediator.Send(command));
         }
 
         [HttpPost("withPhoto")]
-        public async Task<ActionResult<Unit>> CreateWithPhoto([FromForm] Application.Tickets.Create.Command command)
+        public async Task<IActionResult> CreateWithPhoto([FromForm] Application.Tickets.Create.Command command)
         {
-            return await Mediator.Send(command);
+            return HandleResult(await Mediator.Send(command));
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Unit>> Edit(Guid id, Edit.Command command)
+        public async Task<IActionResult> Edit(Guid id, Edit.Command command)
         {
             command.Id = id;
-            return await Mediator.Send(command);
+            return HandleResult(await Mediator.Send(command));
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Unit>> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            return await Mediator.Send(new Delete.Command { Id = id });
+            return HandleResult(await Mediator.Send(new Delete.Command { Id = id }));
         }
 
         [HttpPost("comment/{id}")]
-        public async Task<ActionResult<CommentDto>> Comment(Guid id, AddComment.Command command)
+        public async Task<IActionResult> Comment(Guid id, AddComment.Command command)
         {
             command.Id = id;
-            return await Mediator.Send(command);
+            return HandleResult(await Mediator.Send(command));
         }
 
         [HttpDelete("comment/{ticketId}/{id}")]
-        public async Task<ActionResult<Unit>> Comment(Guid ticketId, Guid id)
+        public async Task<IActionResult> Comment(Guid ticketId, Guid id)
         {
-            return await Mediator.Send(new DelComment.Command { Id = id, TicketId = ticketId });
+            return HandleResult(await Mediator.Send(new DelComment.Command { Id = id, TicketId = ticketId }));
         }
 
         [HttpPut("comment/{ticketId}/{id}")]
-        public async Task<ActionResult<Unit>> EditComment(Guid ticketId, Guid id, EditComment.Command command)
+        public async Task<IActionResult> EditComment(Guid ticketId, Guid id, EditComment.Command command)
         {
             command.CommentId = id;
             command.TicketId = ticketId;
-            return await Mediator.Send(command);
+            return HandleResult(await Mediator.Send(command));
         }
     }
 }

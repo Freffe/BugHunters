@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using MediatR;
 using Persistence;
@@ -11,13 +12,13 @@ namespace Application.Tickets
 {
     public class DelComment
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Guid Id { get; set; }
             public Guid TicketId { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             public Handler(DataContext context)
@@ -25,26 +26,26 @@ namespace Application.Tickets
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
 
                 var ticket = await _context.Tickets.FindAsync(request.TicketId);
                 if (ticket == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Ticket = "Not found" });
+                    return null;
 
                 // Get comment
                 var comment = ticket.Comments.FirstOrDefault(x => x.Id == request.Id);
                 if (comment == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Comment = "Not found" });
+                    return null;
 
                 // Remove it
                 ticket.Comments.Remove(comment);
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Failed to delete comment.");
 
-                throw new Exception("Problem Deleting that ticket comment.");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

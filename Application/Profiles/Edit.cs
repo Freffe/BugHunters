@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
 using FluentValidation;
@@ -12,7 +13,7 @@ namespace Application.Profiles
 {
     public class Edit
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public string DisplayName { get; set; }
             public string Bio { get; set; }
@@ -26,7 +27,7 @@ namespace Application.Profiles
             }
 
         }
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             private readonly IUserAccessor _userAccessor;
@@ -38,14 +39,13 @@ namespace Application.Profiles
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
 
                 if (user == null)
-                {
-                    throw new RestException(System.Net.HttpStatusCode.NotFound, new { user = "Not Found" });
-                }
+                    return null;
+
 
                 user.DisplayName = request.DisplayName ?? user.DisplayName;
                 user.Bio = request.Bio ?? user.Bio;
@@ -53,9 +53,9 @@ namespace Application.Profiles
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Failed to edit Profile.");
 
-                throw new Exception("Problem saving changes in Profiles/edit.cs");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

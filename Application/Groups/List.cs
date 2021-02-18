@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Interfaces;
 using AutoMapper;
 using Domain;
@@ -13,9 +14,9 @@ namespace Application.Groups
 {
     public class List
     {
-        public class Query : IRequest<List<GroupDto>> { }
+        public class Query : IRequest<Result<List<GroupDto>>> { }
 
-        public class Handler : IRequestHandler<Query, List<GroupDto>>
+        public class Handler : IRequestHandler<Query, Result<List<GroupDto>>>
         {
             private readonly DataContext _context;
             private readonly IUserAccessor _userAccessor;
@@ -27,13 +28,11 @@ namespace Application.Groups
                 _context = context;
             }
 
-            public async Task<List<GroupDto>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<List<GroupDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
-
-                //await _context.Groups.FindAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
                 var groups = await _context.Groups.ToListAsync();
-
-                return _mapper.Map<List<Group>, List<GroupDto>>(groups);
+                var mappedGroups = _mapper.Map<List<Group>, List<GroupDto>>(groups);
+                return Result<List<GroupDto>>.Success(mappedGroups);
             }
         }
     }

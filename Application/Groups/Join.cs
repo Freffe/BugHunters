@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
 using Domain;
@@ -13,12 +14,12 @@ namespace Application.Groups
 {
     public class Join
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             private readonly IUserAccessor _userAccessor;
@@ -28,20 +29,20 @@ namespace Application.Groups
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var group = await _context.Groups.FindAsync(request.Id);
                 if (group == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { Group = "Not Found" });
+                    return null;
 
                 var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
                 if (user == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { User = "Not found" });
+                    return null;
 
                 var membership = await _context.UserGroups.SingleOrDefaultAsync(x => x.GroupId == group.Id && x.AppUserId == user.Id);
 
                 if (membership != null)
-                    throw new RestException(HttpStatusCode.BadRequest, new { Membership = "You are already a member of this group." });
+                    return null;
 
                 membership = new UserGroup
                 {
@@ -56,9 +57,9 @@ namespace Application.Groups
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Failed joining group.");
 
-                throw new Exception("Problem saving changes ");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

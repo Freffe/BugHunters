@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.User;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -12,42 +13,45 @@ namespace API.Controllers
     {
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<ActionResult<User>> Login(Login.Query query)
+        public async Task<IActionResult> Login(Login.Query query)
         {
             var user = await Mediator.Send(query);
-            setTokenCookie(user.RefreshToken);
-            return user;
+            if (user != null && user.IsSuccess)
+                setTokenCookie(user.Value.RefreshToken);
+            return HandleResult(user);
         }
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(Register.Command command)
+        public async Task<IActionResult> Register(Register.Command command)
         {
             //command.Origin = Request.Headers["origin"];
-            return await Mediator.Send(command);
+            return HandleResult(await Mediator.Send(command));
             //return Ok("Registration successful - please check your email");
         }
         [HttpGet]
-        public async Task<ActionResult<User>> CurrentUser()
+        public async Task<IActionResult> CurrentUser()
         {
             var user = await Mediator.Send(new CurrentUser.Query());
-            setTokenCookie(user.RefreshToken);
-            return user;
+            if (user.IsSuccess)
+                setTokenCookie(user.Value.RefreshToken);
+            return HandleResult(user);
         }
 
         [HttpDelete("delete/{user}")]
-        public async Task<ActionResult<Unit>> Delete(string user)
+        public async Task<IActionResult> Delete(string user)
         {
             Console.WriteLine($"{user}");
-            return await Mediator.Send(new Delete.Command { User = user });
+            return HandleResult(await Mediator.Send(new Delete.Command { User = user }));
         }
 
         [HttpPost("refreshToken")]
-        public async Task<ActionResult<User>> RefreshToken(Application.User.RefreshToken.Command command)
+        public async Task<IActionResult> RefreshToken(Application.User.RefreshToken.Command command)
         {
             command.RefreshToken = Request.Cookies["refreshToken"];
             var user = await Mediator.Send(command);
-            setTokenCookie(user.RefreshToken);
-            return user;
+            if (user.IsSuccess)
+                setTokenCookie(user.Value.RefreshToken);
+            return HandleResult(user);
         }
         private void setTokenCookie(string refreshToken)
         {

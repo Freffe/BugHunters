@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using MediatR;
 using Persistence;
@@ -10,12 +11,12 @@ namespace Application.Groups
 {
     public class Delete
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             public Handler(DataContext context)
@@ -23,20 +24,20 @@ namespace Application.Groups
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var group = await _context.Groups.FindAsync(request.Id);
 
                 if (group == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { group = "Not found" });
+                    return null;
 
                 _context.Remove(group);
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Failed to delete group.");
 
-                throw new Exception("Problem saving changes Delete Group");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

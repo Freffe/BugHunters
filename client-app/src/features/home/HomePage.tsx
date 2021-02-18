@@ -1,14 +1,14 @@
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Container, Header, Segment, Tab } from 'semantic-ui-react';
-import { RootStoreContext } from '../../app/stores/rootStore';
+import { useStore } from '../../app/stores/store';
 import LoginForm from '../user/LoginForm';
 import RegisterForm from '../user/RegisterForm';
 
 const HomePage = () => {
   const token = window.localStorage.getItem('jwt');
-  const rootStore = useContext(RootStoreContext);
-  const { isLoggedIn, user } = rootStore.userStore;
+  const { userStore } = useStore();
+  const { isLoggedIn, user } = userStore;
   //const { openModal } = rootStore.modalStore;
   return (
     <Segment inverted textAlign='center' vertical className='masthead'>

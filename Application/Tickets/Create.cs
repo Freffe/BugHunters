@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
 using Domain;
@@ -17,7 +18,7 @@ namespace Application.Tickets
 {
     public class Create
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Guid Id { get; set; }
             public Guid? GroupId { get; set; }
@@ -45,7 +46,7 @@ namespace Application.Tickets
                 RuleFor(x => x.Device).NotEmpty();
             }
         }
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             private readonly IUserAccessor _userAccessor;
@@ -59,15 +60,15 @@ namespace Application.Tickets
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
                 if (user == null)
-                    throw new RestException(HttpStatusCode.Unauthorized, new { user = "User not found " });
+                    return null;
 
                 var group = await _context.Groups.FindAsync(request.GroupId);
                 if (group == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { group = "Group not found!" });
+                    return null;
 
                 var ticket = new Ticket
                 {
@@ -87,25 +88,26 @@ namespace Application.Tickets
                     Texts = new List<Text>()
                 };
                 // If photo in request, create new photo then add it to ticket
-                Console.WriteLine(request.File);
+                //Console.WriteLine(request.File);
                 if (request.File != null)
                 {
                     foreach (var photoFile in request.File)
                     {
-                        Console.WriteLine(photoFile.FileName);
+                        //Console.WriteLine(photoFile.FileName);
                         string[] enders = { ".png", ".jpg" };
                         if (enders.Any(photoFile.FileName.Contains))
                         {
-                            Console.WriteLine("Found png or jpg");
+                            //Console.WriteLine("Found png or jpg");
                             var photoUploadResult = _photoAccessor.AddPhoto(photoFile);
-                            Console.WriteLine($"{photoUploadResult} Found png or jpg");
+                            //Console.WriteLine($"{photoUploadResult} Found png or jpg");
+
                             var photo = new Photo
                             {
                                 Url = photoUploadResult.Url,
                                 Id = photoUploadResult.PublicId,
                                 Name = photoFile.FileName
                             };
-                            Console.WriteLine($"Adding photo with Name: {photo.Name}");
+                            //Console.WriteLine($"Adding photo with Name: {photo.Name}");
 
                             ticket.Photos.Add(photo);
                         }
@@ -114,7 +116,7 @@ namespace Application.Tickets
                         if (endersText.Any(photoFile.FileName.Contains))
                         {
                             var textFileUploadResult = _textFileAccessor.AddTextFile(photoFile);
-                            Console.WriteLine($"{textFileUploadResult} is result from addTextFile");
+                            //Console.WriteLine($"{textFileUploadResult} is result from addTextFile");
 
                             var text = new Text
                             {
@@ -124,7 +126,7 @@ namespace Application.Tickets
                             };
 
                             ticket.Texts.Add(text);
-                            Console.WriteLine($"Added text: {photoFile.FileName}");
+                            //Console.WriteLine($"Added text: {photoFile.FileName}");
                         }
                     }
 
@@ -148,9 +150,9 @@ namespace Application.Tickets
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Failed to create ticket.");
 
-                throw new Exception("Problem saving changes create.cs");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Form } from 'semantic-ui-react';
 import { Form as FinalForm, Field } from 'react-final-form';
-import { RootStoreContext } from '../../app/stores/rootStore';
 import TextAreaInput from '../../app/common/form/TextAreaInput';
 import TextInput from '../../app/common/form/TextInput';
 import {
@@ -10,6 +9,7 @@ import {
   ProfileFormValues,
 } from '../../app/models/profile';
 import { observer } from 'mobx-react-lite';
+import { useStore } from '../../app/stores/store';
 
 const required = (value: any) => (value ? undefined : 'Required');
 
@@ -24,9 +24,9 @@ const ProfileAbout: React.FC<IProps> = ({
   profile,
   setEditMode,
 }) => {
-  const rootStore = useContext(RootStoreContext);
-  const { loadingProfileUpdate } = rootStore.profileStore;
-  const { user } = rootStore.userStore;
+  const { profileStore, userStore } = useStore();
+  const { loadingProfileUpdate } = profileStore;
+  const { user } = userStore;
   const [profileData, setProfileData] = useState(new ProfileFormValues());
 
   const handleFinalFormSubmit = async (values: any) => {

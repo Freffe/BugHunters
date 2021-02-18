@@ -1,5 +1,6 @@
+/*
 import { configure } from "mobx";
-import { createContext } from "react";
+import { createContext, useContext } from "react";
 import CommonStore from "./commonStore";
 import GroupStore from "./groupStore";
 import ProfileStore from "./profileStore";
@@ -16,12 +17,18 @@ export class RootStore {
     profileStore: ProfileStore;
 
     constructor() {
-        this.groupStore = new GroupStore(this);
-        this.userStore = new UserStore(this);
-        this.ticketStore = new TicketStore(this);
-        this.commonStore = new CommonStore(this);
-        this.profileStore = new ProfileStore(this);
+        this.groupStore = new GroupStore();
+        this.userStore = new UserStore();
+        this.ticketStore = new TicketStore();
+        this.commonStore = new CommonStore();
+        this.profileStore = new ProfileStore();
     }
 }
 
 export const RootStoreContext = createContext(new RootStore());
+
+export function useStore(){
+    return useContext(RootStoreContext);
+}
+*/
+export {};

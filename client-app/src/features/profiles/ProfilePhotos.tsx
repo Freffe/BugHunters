@@ -1,11 +1,12 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Card, Grid, Header, Image, Tab } from 'semantic-ui-react';
 import PhotoUploadWidget from '../../app/common/photoUpload/PhotoUploadWidget';
-import { RootStoreContext } from '../../app/stores/rootStore';
+
+import { useStore } from '../../app/stores/store';
 
 const ProfilePhotos = () => {
-  const rootStore = useContext(RootStoreContext);
+  const { profileStore } = useStore();
   const {
     profile,
     isCurrentUser,
@@ -14,7 +15,7 @@ const ProfilePhotos = () => {
     setMainPhoto,
     loadingMainPhotoSet,
     deletePhoto,
-  } = rootStore.profileStore;
+  } = profileStore;
   const [addPhotoMode, setAddPhotoMode] = useState(false);
   const [target, setTarget] = useState<string | undefined>(undefined);
   const [deleteTarget, setDeleteTarget] = useState<string | undefined>(

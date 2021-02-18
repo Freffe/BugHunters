@@ -1,9 +1,9 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Grid, Item, Segment } from 'semantic-ui-react';
 import LoadingComponent from '../../app/layout/LoadingComponent';
-import { RootStoreContext } from '../../app/stores/rootStore';
+import { useStore } from '../../app/stores/store';
 import ProfileContent from './ProfileContent';
 import ProfileDescription from './ProfileDescription';
 
@@ -14,7 +14,7 @@ interface RouteParams {
 interface IProps extends RouteComponentProps<RouteParams> {}
 
 const Profile: React.FC<IProps> = ({ match }) => {
-  const { profileStore, groupStore } = useContext(RootStoreContext);
+  const { profileStore, groupStore } = useStore();
   const { loadingProfile, profile, loadProfile } = profileStore;
   const { loadGroups, loadingGroups } = groupStore;
 

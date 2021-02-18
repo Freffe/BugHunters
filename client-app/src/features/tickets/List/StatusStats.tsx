@@ -1,15 +1,14 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Statistic } from 'semantic-ui-react';
-
-import { RootStoreContext } from '../../../app/stores/rootStore';
+import { useStore } from '../../../app/stores/store';
 
 interface IProps {
   groupId: string;
 }
 
 const StatusStats: React.FC<IProps> = ({ groupId }) => {
-  const { groupStore } = useContext(RootStoreContext);
+  const { groupStore } = useStore();
   const { getGroups } = groupStore;
 
   const groupStats = { open: 0, verify: 0, closed: 0 };

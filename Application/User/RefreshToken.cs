@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
 using Domain;
@@ -13,12 +14,12 @@ namespace Application.User
 {
     public class RefreshToken
     {
-        public class Command : IRequest<User>
+        public class Command : IRequest<Result<User>>
         {
             public string RefreshToken { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command, User>
+        public class Handler : IRequestHandler<Command, Result<User>>
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly IJwtGenerator _jwtGenerator;
@@ -30,14 +31,16 @@ namespace Application.User
                 _userManager = userManager;
             }
 
-            public async Task<User> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<User>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var user = await _userManager.FindByNameAsync(_userAccessor.GetCurrentUsername());
+                if (user == null)
+                    return null;
 
                 var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == request.RefreshToken);
 
                 if (oldToken != null && !oldToken.IsActive)
-                    throw new RestException(HttpStatusCode.Unauthorized);
+                    return null;
 
                 if (oldToken != null)
                 {
@@ -49,7 +52,7 @@ namespace Application.User
 
                 await _userManager.UpdateAsync(user);
 
-                return new User(user, _jwtGenerator, newRefreshToken.Token);
+                return Result<User>.Success(new User(user, _jwtGenerator, newRefreshToken.Token));
             }
         }
     }

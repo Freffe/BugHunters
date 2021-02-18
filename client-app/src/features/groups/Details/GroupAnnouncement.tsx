@@ -8,7 +8,6 @@ import {
   Popup,
   Accordion,
   Icon,
-  Grid,
 } from 'semantic-ui-react';
 import { IAnnouncement } from '../../../app/models/groups';
 

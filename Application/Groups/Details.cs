@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using AutoMapper;
 using Domain;
@@ -12,12 +13,12 @@ namespace Application.Groups
 {
     public class Details
     {
-        public class Query : IRequest<GroupDto>
+        public class Query : IRequest<Result<GroupDto>>
         {
             public Guid Id { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, GroupDto>
+        public class Handler : IRequestHandler<Query, Result<GroupDto>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -27,15 +28,15 @@ namespace Application.Groups
                 _context = context;
             }
 
-            public async Task<GroupDto> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<GroupDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var group = await _context.Groups.FindAsync(request.Id);
 
                 if (group == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { group = "Not found" });
+                    return null;
 
                 var groupToReturn = _mapper.Map<Group, GroupDto>(group);
-                return groupToReturn;
+                return Result<GroupDto>.Success(groupToReturn);
             }
         }
     }

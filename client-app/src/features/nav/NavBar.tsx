@@ -1,16 +1,16 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Container, Menu, Image, Dropdown, Grid } from 'semantic-ui-react';
-import { RootStoreContext } from '../../app/stores/rootStore';
+import { useStore } from '../../app/stores/store';
 
 const NavBar = () => {
-  const rootStore = useContext(RootStoreContext);
-  const { user, logout } = rootStore.userStore;
+  const { userStore } = useStore();
+  const { user, logout } = userStore;
   return (
     <Grid>
       <Menu fixed='top' inverted>
-        <Container>
+        <Container style={{ border: 'none' }}>
           <Grid.Column>
             <Menu.Item header as={NavLink} exact to='/'>
               <img
@@ -24,6 +24,7 @@ const NavBar = () => {
           <Menu.Item as={NavLink} to='/issues' name='Issues' />
 
           <Menu.Item as={NavLink} to='/groups' name='Groups' />
+          {/*<Menu.Item as={NavLink} to='/errors' name='Errors' /> */}
 
           <Menu.Item as={NavLink} to='/createTicket' name='Create Ticket' />
           {user && (

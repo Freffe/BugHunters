@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Form, Segment } from 'semantic-ui-react';
 import { IGroup } from '../../../app/models/groups';
 import { observer } from 'mobx-react-lite';
@@ -7,7 +7,7 @@ import { Form as FinalForm, Field } from 'react-final-form';
 import TextInput from '../../../app/common/form/TextInput';
 import TextAreaInput from '../../../app/common/form/TextAreaInput';
 import FormCheckbox from '../../../app/common/form/FormCheckbox';
-import { RootStoreContext } from '../../../app/stores/rootStore';
+import { useStore } from '../../../app/stores/store';
 
 // requirement fields for validation in form.
 const required = (value: any) => (value ? undefined : 'Required');
@@ -42,7 +42,7 @@ const GroupForm: React.FC<IProps> = ({
       verify: 0,
     };
   };
-  const { groupStore } = useContext(RootStoreContext);
+  const { groupStore } = useStore();
   const [group, setGroup] = useState<IGroup>(initializeForm);
 
   const handleFinalFormSubmit = async (value: any) => {

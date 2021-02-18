@@ -1,17 +1,16 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Grid, Segment, Image, Button, Icon, Popup } from 'semantic-ui-react';
 import { ITicketPhoto, ITicketText } from '../../../app/models/tickets';
-import { RootStoreContext } from '../../../app/stores/rootStore';
+import { useStore } from '../../../app/stores/store';
 import PhotoModal from '../Details/PhotoModal';
 
 const TicketAttachementsContainer: React.FC<{
   photos?: ITicketPhoto[] | undefined;
   texts?: ITicketText[] | undefined;
   setFiles?: (list: any[]) => void;
-  setFilesForForm?: (list: any[]) => void;
-}> = ({ photos, setFiles, setFilesForForm, texts }) => {
-  const { ticketStore } = useContext(RootStoreContext);
+}> = ({ photos, setFiles, texts }) => {
+  const { ticketStore } = useStore();
   const {
     isTicketCreatorOrAdmin,
     selectedTicket,
@@ -25,7 +24,7 @@ const TicketAttachementsContainer: React.FC<{
   const [idForSelectedImg, setIdForSelectedImg] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   let renderFiles = photos ? photos : texts;
-  console.log(renderFiles);
+
   const renderContent = (files: any[], isText: boolean) => {
     return (
       files!.length > 0 && (
@@ -162,11 +161,9 @@ const TicketAttachementsContainer: React.FC<{
         }
       }
 
-      //setIdForSelectedImg((newFiles.size - 1).toString());
-      console.log('newFiles: ', newFiles);
+      // console.log('newFiles: ', newFiles);
       setFiles!(newFiles);
       setTicketFiles(newFiles);
-      //if (setFilesForForm) setFilesForForm(newFiles);
     }
   };
 

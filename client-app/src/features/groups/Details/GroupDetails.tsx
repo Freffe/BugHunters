@@ -1,12 +1,11 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Divider, Item, Segment } from 'semantic-ui-react';
 
 import { IGroup, IMember } from '../../../app/models/groups';
-import { RootStoreContext } from '../../../app/stores/rootStore';
+import { useStore } from '../../../app/stores/store';
 import GroupAdminsList from './GroupAdminsList';
 import GroupAnnouncement from './GroupAnnouncement';
-import GroupAnnouncementTest from './GroupAnnouncement';
 import GroupClickToComment from './GroupClickToComment';
 import GroupDescriptionEdit from './GroupDescriptionEdit';
 import GroupDetailedChatFlow from './GroupDetailedChatFlow';
@@ -20,7 +19,7 @@ interface IProps {
 
 const GroupDetails: React.FC<IProps> = ({ group }) => {
   const { groupName, description, id, members, photos } = group;
-  const { groupStore } = useContext(RootStoreContext);
+  const { groupStore } = useStore();
   const {
     stopHubConnection,
     leaveGroup,

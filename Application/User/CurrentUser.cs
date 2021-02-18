@@ -6,14 +6,15 @@ using Microsoft.AspNetCore.Identity;
 using Domain;
 using Application.Interfaces;
 using System.Linq;
+using Application.Core;
 
 namespace Application.User
 {
     public class CurrentUser
     {
-        public class Query : IRequest<User> { }
+        public class Query : IRequest<Result<User>> { }
 
-        public class Handler : IRequestHandler<Query, User>
+        public class Handler : IRequestHandler<Query, Result<User>>
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly IJwtGenerator _jwtGenerator;
@@ -26,14 +27,14 @@ namespace Application.User
                 _userManager = userManager;
             }
 
-            public async Task<User> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<User>> Handle(Query request, CancellationToken cancellationToken)
             {
                 // Get user from DB
                 var user = await _userManager.FindByNameAsync(_userAccessor.GetCurrentUsername());
                 var refreshToken = _jwtGenerator.GenerateRefreshToken();
                 user.RefreshTokens.Add(refreshToken);
                 await _userManager.UpdateAsync(user);
-                return new User(user, _jwtGenerator, refreshToken.Token);
+                return Result<User>.Success(new User(user, _jwtGenerator, refreshToken.Token));
             }
         }
     }

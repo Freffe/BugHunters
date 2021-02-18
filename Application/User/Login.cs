@@ -1,8 +1,11 @@
+using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
+using Application.Validators;
 using Domain;
 using FluentValidation;
 using MediatR;
@@ -13,7 +16,7 @@ namespace Application.User
 {
     public class Login
     {
-        public class Query : IRequest<User>
+        public class Query : IRequest<Result<User>>
         {
 
             public string Email { get; set; }
@@ -29,7 +32,7 @@ namespace Application.User
             }
         }
 
-        public class Handler : IRequestHandler<Query, User>
+        public class Handler : IRequestHandler<Query, Result<User>>
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly SignInManager<AppUser> _signInManager;
@@ -51,14 +54,30 @@ namespace Application.User
                 }
             }
 
-            public async Task<User> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<User>> Handle(Query request, CancellationToken cancellationToken)
             {
-                // Handler logic
-                // Bob@test.com will crash, 2 users with same mail.
-                var user = await _userManager.FindByEmailAsync(request.Email);
-                if (user == null)
+                try
                 {
-                    throw new RestException(HttpStatusCode.Unauthorized);
+                    var user = await _userManager.FindByEmailAsync(request.Email);
+                    if (user == null)
+                        return null;
+                    var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+
+                    if (result.Succeeded)
+                    {
+
+                        var refreshToken = _jwtGenerator.GenerateRefreshToken();
+                        user.RefreshTokens.Add(refreshToken);
+                        await _userManager.UpdateAsync(user);
+
+                        return Result<User>.Success(new User(user, _jwtGenerator, refreshToken.Token));
+                    }
+                    return Result<User>.Failure("Failed to login that user.");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Catched error in login: {e}");
+                    return null;
                 }
                 /*
                 if (!user.EmailConfirmed)
@@ -66,18 +85,6 @@ namespace Application.User
                     throw new RestException(HttpStatusCode.BadRequest, new { Email = "Email is not confirmed" });
                 }
                 */
-                var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
-
-                if (result.Succeeded)
-                {
-
-                    var refreshToken = _jwtGenerator.GenerateRefreshToken();
-                    user.RefreshTokens.Add(refreshToken);
-                    await _userManager.UpdateAsync(user);
-
-                    return new User(user, _jwtGenerator, refreshToken.Token);
-                }
-                throw new RestException(HttpStatusCode.Unauthorized);
             }
         }
     }

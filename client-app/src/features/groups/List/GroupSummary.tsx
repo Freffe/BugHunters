@@ -1,15 +1,15 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Button, Divider, Icon, Item } from 'semantic-ui-react';
 import { IGroup } from '../../../app/models/groups';
-import { RootStoreContext } from '../../../app/stores/rootStore';
+import { useStore } from '../../../app/stores/store';
 
 interface IProps {
   group: IGroup;
 }
 
 const GroupSummary: React.FC<IProps> = ({ group }) => {
-  const { groupStore } = useContext(RootStoreContext);
+  const { groupStore } = useStore();
   const { joinGroup, submittingGroup } = groupStore;
   const { groupName, description, id } = group;
   return (

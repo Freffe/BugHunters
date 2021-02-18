@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Interfaces;
 using Domain;
 using FluentValidation;
@@ -12,7 +13,7 @@ namespace Application.Groups
 {
     public class Create
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Guid Id { get; set; }
             public bool IsPublic { get; set; }
@@ -33,7 +34,7 @@ namespace Application.Groups
             }
         }
 
-        public class Handler : IRequestHandler<Command>
+        public class Handler : IRequestHandler<Command, Result<Unit>>
         {
             private readonly DataContext _context;
             private readonly IUserAccessor _userAccessor;
@@ -43,7 +44,7 @@ namespace Application.Groups
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var group = new Group
                 {
@@ -60,6 +61,8 @@ namespace Application.Groups
                 _context.Groups.Add(group);
                 var user = await _context.Users.SingleOrDefaultAsync(x =>
                 x.UserName == _userAccessor.GetCurrentUsername());
+                if (user == null)
+                    return null;
 
                 var newMember = new UserGroup
                 {
@@ -73,9 +76,9 @@ namespace Application.Groups
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return Unit.Value;
+                if (!success) return Result<Unit>.Failure("Failed to create group.");
 
-                throw new Exception("Problem saving changes create.cs");
+                return Result<Unit>.Success(Unit.Value);
             }
         }
     }

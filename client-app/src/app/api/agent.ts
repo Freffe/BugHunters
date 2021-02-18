@@ -1,12 +1,18 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { history } from '../..';
 import { IAnnouncement, IComment, IGroup } from '../models/groups';
 import { IPhoto, IProfile, IProfileEdits } from '../models/profile';
 import { ITicket, ITicketPhoto, ITicketText } from '../models/tickets';
 import { IUser, IUserFormValues } from '../models/user';
+import { store } from '../stores/store';
 
-axios.defaults.baseURL = "http://localhost:5000/api";
+const sleep = (delay: number) => {
+    return new Promise((resolve) => {
+        setTimeout(resolve, delay)
+    })
+}
 
+axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
 axios.interceptors.request.use((config: any) => {
     const token = window.localStorage.getItem("jwt");
@@ -18,60 +24,80 @@ axios.interceptors.request.use((config: any) => {
     return Promise.reject(error);
 });
 
-axios.interceptors.response.use(undefined, error => {
-    const {status, data, config, headers} = error.response;
+axios.interceptors.response.use(async response => {
+    if (process.env.NODE_ENV === 'development') await sleep(1000);
 
-    if (error.Message === 'Network Error' && !error.response) {
+    return response;
+}, (error: AxiosError) => {
+    console.log("error: ", error.response);
+    
+    const {status, data, config, headers} = error.response!;
+    if (error.message === 'Network Error' && !error.response) {
         history.push('/NoNet');
     }
-    if (status === 404) {
-        history.push('/notfound');
-    }
-    if (status === 401 && headers['www-authenticate'].includes('The token expired'))
+
+    if (status === 400) {
+        if (typeof data === "string")
+            return Promise.reject(error.response);
+        if (config.method === 'get' && data.errors.hasOwnProperty('id'))
+            history.push('/notfound');
+        if (data.errors) {
+            const flattenErrors = [];
+            for (const key in data.errors) {
+                if (data.errors[key]) {
+                    flattenErrors.push(data.errors[key])
+                }
+            }
+            throw flattenErrors.flat();
+        }
+    } 
+
+    if (status === 401 && headers['www-authenticate']?.includes('The token expired'))
     {
         window.localStorage.removeItem("jwt");
         history.push("/");
         console.log("Your session has expired, please login again");
-        console.log(error.response);
+        //console.log(error.response);
     }
-    if (status === 400 && config.method === 'get' && data.errors.hasOwnProperty('id')) {
+    if (status === 401)
+    {
+        history.push("/");
+    }     
+    if (status === 404 && config.url === "/user/login") {
+        return Promise.reject(error.response);
+    }
+    if (status === 400 && config.url === "/user/login") {
+        return Promise.reject(error.response);
+    }
+    if (status === 404) {
         history.push('/notfound');
     }
 
-    //if (status === 400 && config.method === 'post') {
-    //    history.push('/notfound');
-    //}
-
     if (status === 500) {
-        history.push('/NoServer')
+        store.commonStore.setServerError(data);
+        history.push('/server-error')
     }
-    throw error.response;
+    //throw error.response;
+    return Promise.reject(error.response);
 })
 
 const responseBody = (response: AxiosResponse) => response.data;
 
-const sleep = (ms: number) => (response: AxiosResponse) => 
-    new Promise<AxiosResponse>(resolve => setTimeout(() => resolve(response), ms))
-
 const requests = {
-    get: (url: string) => axios.get(url).then(sleep(1000)).then(responseBody),
-    post: (url: string, body: {}) => axios.post(url, body).then(sleep(1000)).then(responseBody),
-    put: (url: string, body: {}) => axios.put(url, body).then(sleep(1000)).then(responseBody),
-    del: (url: string) => axios.delete(url).then(sleep(1000)).then(responseBody),
+    get: (url: string) => axios.get(url).then(responseBody),
+    post: (url: string, body: {}) => axios.post(url, body).then(responseBody),
+    put: (url: string, body: {}) => axios.put(url, body).then(responseBody),
+    del: (url: string) => axios.delete(url).then(responseBody),
     postForm: async (url: string, file: any) => {
         const formData = new FormData();
-        //const blob = await fetch(file).then((res) => res.blob());
         // Note: Keyword_must_be "File" 
         formData.append("File", file.blob, file.name);
-        //formData.append("FileName", file)
         return axios.post(url, formData, {
             headers: {'Content-Type': "multipart/form-data"}
         }).then(responseBody)
     },
     postTicketForm: async (url: string, ticket: any, file: any) => {
         const formData = new FormData();
-        //const blob = await fetch(file).then((res) => res.blob());
-        // Note: Keyword_must_be "File" 
         for (var key in ticket) {
             formData.append(key, ticket[key]);
         }
@@ -82,32 +108,22 @@ const requests = {
     },
     postTicketForms: async (url: string, ticket: any, data: Array<{blob: Blob, name: string}>) => {
         const formData = new FormData();
-        //const blob = await fetch(file).then((res) => res.blob());
-        // Note: Keyword_must_be "File" 
         for (var key in ticket) {
             formData.append(key, ticket[key]);
         }
-        
-        let blobData: Blob[] = [];
-        let nameData: string[]= []
-        console.log("ITEM: OUTSIDE ", data[0]);
+
         for (var i = 0; i < data.length; i++) {
-            blobData.push(data[i].blob);
-            nameData.push(data[i].name);
-            console.log("ITEM: ", data[i]);
             formData.append("File", data[i].blob, data[i].name);
         }
-        console.log("FORMDATA: ", formData);
+
         return axios.post(url, formData, {
             headers: {'Content-Type': "multipart/form-data"}
         }).then(responseBody)
     },
     postTextForm: async (url: string, file: Blob) => {
         const formData = new FormData();
-        //const blob = await fetch(file).then((res) => res.blob());
-        // Note: Keyword_must_be "File" 
         formData.append("File", file);
-        //formData.append("FileName", file)
+
         return axios.post(url, formData, {
             headers: {'Content-Type': 'text/plain; charset="utf-8"'}
         }).then(responseBody)
@@ -162,5 +178,6 @@ const Profiles = {
     deletePhoto: (id: string) => requests.del(`/photos/${id}`),
     editProfile: (profile: IProfileEdits) => requests.put(`/profiles`, profile)
 }
+const agent = { Tickets, Groups, User, Profiles };
 
-export default { Tickets, Groups, User, Profiles };
+export default agent;

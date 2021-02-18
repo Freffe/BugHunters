@@ -1,12 +1,12 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Grid, Modal, Segment } from 'semantic-ui-react';
-import { RootStoreContext } from '../../app/stores/rootStore';
+import { useStore } from '../../app/stores/store';
 
 const ProfileSettings = () => {
-  const rootStore = useContext(RootStoreContext);
-  const { profile } = rootStore.profileStore;
-  const { deleteAccount, isDeletingUser } = rootStore.userStore;
+  const { profileStore, userStore } = useStore();
+  const { profile } = profileStore;
+  const { deleteAccount, isDeletingUser } = userStore;
 
   const [isOpen, setIsOpen] = useState(false);
 

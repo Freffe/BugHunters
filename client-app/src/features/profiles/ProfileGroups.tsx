@@ -1,11 +1,12 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { List, Segment, Image } from 'semantic-ui-react';
-import { RootStoreContext } from '../../app/stores/rootStore';
+
+import { useStore } from '../../app/stores/store';
 
 const ProfileGroups = () => {
-  const { groupStore } = useContext(RootStoreContext);
+  const { groupStore } = useStore();
   const { groupTitleForUser } = groupStore;
   const isItCalling = (key: string) => {
     groupStore.setSelectedGroup(key);

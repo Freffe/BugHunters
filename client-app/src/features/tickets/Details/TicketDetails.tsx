@@ -119,25 +119,23 @@ const TicketDetails: React.FC<IProps> = ({
           )}
         </Accordion>
         {
-          isTicketCreatorOrAdmin && (
-            <UploadHoc
-              isPreview={true}
-              LIMIT_FILESIZE={LIMIT_FILESIZE}
-              LIMIT_FILETYPE={LIMIT_FILETYPE}
-              ticketId={ticket.id}
-              buttonText='Add Photo'
-              isAddingItem={isAddingPhoto}
-              addFile={addPhoto}
-              toobig_message={[
-                `Sorry that file is too big.`,
-                `Maximum size is ${LIMIT_FILESIZE} kb.`,
-              ]}
-              badfile_message='Change filetype to image/jpeg or image/png.'
-            />
-          )
+          <UploadHoc
+            isPreview={true}
+            LIMIT_FILESIZE={LIMIT_FILESIZE}
+            LIMIT_FILETYPE={LIMIT_FILETYPE}
+            ticketId={ticket.id}
+            buttonText='Add Photo'
+            isAddingItem={isAddingPhoto}
+            addFile={addPhoto}
+            toobig_message={[
+              `Sorry that file is too big.`,
+              `Maximum size is ${LIMIT_FILESIZE} kb.`,
+            ]}
+            badfile_message='Change filetype to image/jpeg or image/png.'
+          />
           // <TicketUploadPhoto isPreview={true} />
         }
-        {isTicketCreatorOrAdmin && (
+        {
           <UploadHoc
             isPreview={true}
             LIMIT_FILESIZE={LIMIT_TEXTFILESIZE}
@@ -152,7 +150,7 @@ const TicketDetails: React.FC<IProps> = ({
             ]}
             badfile_message='Change filetype to text/plain or .txt'
           />
-        )}
+        }
       </Grid.Column>
     </Grid>
   );

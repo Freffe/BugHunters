@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces;
 using Application.Validators;
@@ -18,7 +19,7 @@ namespace Application.User
 {
     public class Register
     {
-        public class Command : IRequest<User>
+        public class Command : IRequest<Result<User>>
         {
             public string DisplayName { get; set; }
             public string Username { get; set; }
@@ -37,7 +38,7 @@ namespace Application.User
                 RuleFor(x => x.Password).Password();
             }
         }
-        public class Handler : IRequestHandler<Command, User>
+        public class Handler : IRequestHandler<Command, Result<User>>
         {
             private readonly DataContext _context;
             private readonly UserManager<AppUser> _userManager;
@@ -48,18 +49,14 @@ namespace Application.User
                 _context = context;
                 _userManager = userManager;
             }
-            public async Task<User> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<User>> Handle(Command request, CancellationToken cancellationToken)
             {
                 // Is username or email in use?
                 if (await _context.Users.AnyAsync(x => x.Email == request.Email))
-                {
-                    throw new RestException(HttpStatusCode.BadRequest, new { Email = "Email already in use!" });
-                }
+                    return Result<User>.Failure("A user with that email already exist.");
 
                 if (await _context.Users.AnyAsync(x => x.UserName == request.Username))
-                {
-                    throw new RestException(HttpStatusCode.BadRequest, new { Username = "Username already in use!" });
-                }
+                    return Result<User>.Failure("A user with that name already exist.");
 
                 var user = new AppUser
                 {
@@ -76,9 +73,9 @@ namespace Application.User
                 if (result.Succeeded)
                 {
                     //throw new Exception("Problem creating user");
-                    return new User(user, _jwtGenerator, refreshToken.Token);
+                    return Result<User>.Success(new User(user, _jwtGenerator, refreshToken.Token));
                 }
-                throw new Exception("Problem creating user");
+                return Result<User>.Failure("Problem creating user.");
                 // Create a token that we can send to the user
                 //var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 // Convert token into querystring format as to avoid having the browser interact with this

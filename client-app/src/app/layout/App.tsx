@@ -1,6 +1,6 @@
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import React, { Fragment, useContext, useEffect } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import {
   Route,
   RouteComponentProps,
@@ -8,6 +8,8 @@ import {
   withRouter,
 } from 'react-router-dom';
 import { Container } from 'semantic-ui-react';
+import ServerError from '../../features/errors/ServerError';
+import TestErrors from '../../features/errors/TestErrors';
 import GroupList from '../../features/groups/List/GroupList';
 import HomePage from '../../features/home/HomePage';
 import NavBar from '../../features/nav/NavBar';
@@ -15,15 +17,15 @@ import Profile from '../../features/profiles/Profile';
 import TicketFullDetails from '../../features/tickets/Details/TicketFullDetails';
 import TicketForm from '../../features/tickets/Form/TicketForm';
 import TicketList from '../../features/tickets/List/TicketList';
-import { RootStoreContext } from '../stores/rootStore';
+import { useStore } from '../stores/store';
 import LoadingComponent from './LoadingComponent';
 import NotFound from './NotFound';
 import PrivateRoute from './PrivateRoute';
 
 const App: React.FC<RouteComponentProps> = ({ location }) => {
-  const rootStore = useContext(RootStoreContext);
-  const { setAppLoaded, token, appLoaded } = rootStore.commonStore;
-  const { getUser } = rootStore.userStore;
+  const { commonStore, userStore } = useStore();
+  const { setAppLoaded, token, appLoaded } = commonStore;
+  const { getUser } = userStore;
 
   useEffect(() => {
     autorun(() => {
@@ -47,7 +49,7 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
         render={() => (
           <Fragment>
             <NavBar />
-            <Container style={{ marginTop: '7em', border: '2px solid black' }}>
+            <Container style={{ marginTop: '7em' }}>
               <Switch>
                 <PrivateRoute path='/issues' component={TicketList} />
                 <PrivateRoute
@@ -61,6 +63,8 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
                 <PrivateRoute path='/groups' component={GroupList} />
                 <PrivateRoute path='/createTicket' component={TicketForm} />
                 <PrivateRoute path='/profile/:username' component={Profile} />
+                {/* <Route path='/errors' component={TestErrors} />  */}
+                <Route path='/server-error' component={ServerError} />
                 <Route component={NotFound} />
               </Switch>
             </Container>

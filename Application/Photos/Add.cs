@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Interfaces;
 using Domain;
 using MediatR;
@@ -13,12 +14,12 @@ namespace Application.Photos
 {
     public class Add
     {
-        public class Command : IRequest<Photo>
+        public class Command : IRequest<Result<Photo>>
         {
             public IFormFile File { get; set; }
         }
 
-        public class Handler : IRequestHandler<Command, Photo>
+        public class Handler : IRequestHandler<Command, Result<Photo>>
         {
             private readonly DataContext _context;
             private readonly IUserAccessor _userAccessor;
@@ -30,12 +31,14 @@ namespace Application.Photos
                 _context = context;
             }
 
-            public async Task<Photo> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Photo>> Handle(Command request, CancellationToken cancellationToken)
             {
                 // handler logic
                 var photoUploadResult = _photoAccessor.AddPhoto(request.File);
 
                 var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
+                if (user == null)
+                    return null;
 
                 var photo = new Photo
                 {
@@ -51,9 +54,9 @@ namespace Application.Photos
 
                 var success = await _context.SaveChangesAsync() > 0;
 
-                if (success) return photo;
+                if (!success) return Result<Photo>.Failure("Failed to add photo.");
 
-                throw new Exception("Problem saving changes in Add.cs");
+                return Result<Photo>.Success(photo);
             }
         }
     }

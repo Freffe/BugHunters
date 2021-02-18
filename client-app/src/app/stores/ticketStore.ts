@@ -3,13 +3,14 @@ import { history } from "../..";
 import agent from "../api/agent";
 import { IComment, IMember } from "../models/groups";
 import { ITicket, ITicketPhoto, ITicketText } from "../models/tickets";
-import { RootStore } from "./rootStore";
+
+import { store } from "./store";
 
 export default class TicketStore {
-    rootStore: RootStore;
+ 
 
-    constructor(rootStore: RootStore) {
-        this.rootStore = rootStore;
+    constructor() {
+     
         makeAutoObservable(this);
     }
 
@@ -45,19 +46,28 @@ export default class TicketStore {
     isTicketCreatorOrAdmin =  () => {
         // Requires that selected ticket is in selectedGroup.
         runInAction(async () => {
-            if (this.rootStore.groupStore.groupRegistry.size === 0) {
+          /* *  if (this.rootStore.groupStore.groupRegistry.size === 0) {
                 await this.rootStore.groupStore.loadGroups();
+            }
+            */           
+            if (store.groupStore.groupRegistry.size === 0) {
+                await store.groupStore.loadGroups();
             }
             
             
         })
-        const isAdmin = this.rootStore.groupStore.isHostOrAdminOfGroup || 
+        /* *const isAdmin = this.rootStore.groupStore.isHostOrAdminOfGroup || 
             this.rootStore.groupStore.groupRegistry.get(this.selectedTicket?.groupId)?.members.filter((member: IMember) => 
                 member.isHost && member.username === this.rootStore.userStore.user?.username
+            ).length > 0; */
+        const isAdmin = store.groupStore.isHostOrAdminOfGroup || 
+            store.groupStore.groupRegistry.get(this.selectedTicket?.groupId)?.members.filter((member: IMember) => 
+                member.isHost && member.username === store.userStore.user?.username
             ).length > 0;
         // Is there another way to get isAdmin without groupStore without calling db?
 
-        const isCreator = this.selectedTicket?.creator === this.rootStore.userStore.user?.username;
+        // *const isCreator = this.selectedTicket?.creator === this.rootStore.userStore.user?.username;
+        const isCreator = this.selectedTicket?.creator === store.userStore.user?.username;
         return isAdmin || isCreator;
     }
 

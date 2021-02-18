@@ -11,17 +11,17 @@ namespace API.Controllers
     {
 
         [HttpPost("tickets/{id}")]
-        public async Task<ActionResult<Text>> Text(Guid id, [FromForm] AddTicketTextFile.Command command)
+        public async Task<IActionResult> Text(Guid id, [FromForm] AddTicketTextFile.Command command)
         {
             command.Id = id;
-            return await Mediator.Send(command);
+            return HandleResult(await Mediator.Send(command));
         }
 
         [HttpDelete("tickets/{ticketId}/{textId}")]
-        public async Task<ActionResult<Unit>> Text(Guid ticketId, string textId, [FromForm] DelTicketTextFile.Command command)
+        public async Task<IActionResult> Text(Guid ticketId, string textId, [FromForm] DelTicketTextFile.Command command)
         {
 
-            return await Mediator.Send(new DelTicketTextFile.Command { Id = textId, TicketId = ticketId });
+            return HandleResult(await Mediator.Send(new DelTicketTextFile.Command { Id = textId, TicketId = ticketId }));
         }
     }
 }

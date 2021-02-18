@@ -1,16 +1,16 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
-import { Console } from "console";
 import { makeAutoObservable, observable, runInAction  } from "mobx";
 import { createMember } from "../../features/utils/helperMethods";
 import agent from "../api/agent";
 import { IAnnouncement, IGroup, IMember } from "../models/groups";
 import { IPhoto } from "../models/profile";
-import { RootStore } from "./rootStore";
+
+import { store } from "./store";
 
 export default class GroupStore {
-    rootStore: RootStore;
-    constructor(rootStore: RootStore) {
-        this.rootStore = rootStore;
+  
+    constructor() {
+     
         makeAutoObservable(this);
     }
 
@@ -30,7 +30,8 @@ export default class GroupStore {
     get isHostOfGroup() {
         // If user is host return true:
         return this.selectedGroup.members.filter((member: IMember) => 
-            member.isHost && member.username === this.rootStore.userStore.user?.username
+           //* member.isHost && member.username === this.rootStore.userStore.user?.username
+            member.isHost && member.username === store.userStore.user?.username
         ).length > 0;
     }
 
@@ -38,7 +39,8 @@ export default class GroupStore {
     get isHostOrAdminOfGroup() {
         // If user is host return true:
         return this.selectedGroup?.members.filter((member: IMember) => 
-            (member.isHost || member.isAdmin) && member.username === this.rootStore.userStore.user?.username
+            //*(member.isHost || member.isAdmin) && member.username === this.rootStore.userStore.user?.username
+            (member.isHost || member.isAdmin) && member.username === store.userStore.user?.username
         ).length > 0;
     }
 
@@ -67,7 +69,8 @@ export default class GroupStore {
         .slice()
         .sort((a, b) => a.groupName?.charAt(0).localeCompare(b.groupName.charAt(0)))
         .filter((group: IGroup) => group.members?.filter((member: IMember) => 
-           (member.username === this.rootStore.userStore.user?.username)).length
+           //*(member.username === this.rootStore.userStore.user?.username)).length
+           (member.username === store.userStore.user?.username)).length
         ).map((group: IGroup) => 
             ({"key": group.id, "value":  group.id, "text": group.groupName,  "photo": group.photos?.slice(0,1)[0] })
         );
@@ -77,8 +80,9 @@ export default class GroupStore {
         // process.env.REACT_APP_API_CHAT_URL!
         // Prevent this from opening two connections with the same token.
         try {
-            this.hubConnection = new HubConnectionBuilder().withUrl("http://localhost:5000/chat", {
-                accessTokenFactory: () => this.rootStore.commonStore.token!
+            this.hubConnection = new HubConnectionBuilder().withUrl(process.env.REACT_APP_API_CHAT_URL + '?groupId=' + groupId, {
+                //*accessTokenFactory: () => this.rootStore.commonStore.token!
+                accessTokenFactory: () => store.commonStore.token!
             })
             .configureLogging(LogLevel.Information).build();
             //console.log("Starting hub connection: ", this.selectedGroupId!);
@@ -255,7 +259,8 @@ export default class GroupStore {
         try {
             await agent.Groups.create(group);
             let members = [];
-            const member = createMember(this.rootStore.userStore.user!);
+            //*const member = createMember(this.rootStore.userStore.user!);
+            const member = createMember(store.userStore.user!);
             member.isHost = true;
             members.push(member);
             group.members = members;
@@ -315,7 +320,8 @@ export default class GroupStore {
             await agent.Groups.join(groupId);
             runInAction(() => {
                 // Add user to memberlist for grp
-                this.selectedGroup.members.push(this.rootStore.userStore.user);
+                //*this.selectedGroup.members.push(this.rootStore.userStore.user);
+                this.selectedGroup.members.push(store.userStore.user);
                 this.submittingGroup = false;
             })
         } catch(err) {
@@ -333,7 +339,8 @@ export default class GroupStore {
             runInAction(() => {
 
                 this.selectedGroup.members  = this.selectedGroup.members.filter((member: IMember) => 
-                    member.username !== this.rootStore.userStore.user?.username
+                    //*member.username !== this.rootStore.userStore.user?.username
+                    member.username !== store.userStore.user?.username
                 );
                 this.selectedGroupId = "";
                 this.submittingGroup = false;

@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Tab } from 'semantic-ui-react';
-import { RootStoreContext } from '../../app/stores/rootStore';
+import { useStore } from '../../app/stores/store';
 import ProfileGroups from './ProfileGroups';
 
 import ProfilePhotos from './ProfilePhotos';
@@ -18,8 +18,8 @@ const ProfileContent = () => {
       render: () => isCurrentUser && <ProfileSettings />,
     },
   ];
-  const rootStore = useContext(RootStoreContext);
-  const { isCurrentUser } = rootStore.profileStore;
+  const { profileStore } = useStore();
+  const { isCurrentUser } = profileStore;
   return (
     <Tab
       menu={{

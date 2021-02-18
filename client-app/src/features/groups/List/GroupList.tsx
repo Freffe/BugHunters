@@ -1,22 +1,15 @@
-import React, { useContext, useEffect, useState } from 'react';
-import {
-  Button,
-  Container,
-  Divider,
-  Dropdown,
-  Grid,
-  Segment,
-} from 'semantic-ui-react';
+import React, { useEffect, useState } from 'react';
+import { Button, Divider, Dropdown, Grid, Segment } from 'semantic-ui-react';
 import GroupListExplainer from './GroupListExplainer';
 import { observer } from 'mobx-react-lite';
 import { IGroup, IMember } from '../../../app/models/groups';
 import GroupSummary from './GroupSummary';
 import GroupForm from '../Form/GroupForm';
 import LoadingComponent from '../../../app/layout/LoadingComponent';
-import { RootStoreContext } from '../../../app/stores/rootStore';
 import GroupDetails from '../Details/GroupDetails';
 
 import { RouteComponentProps, useHistory } from 'react-router-dom';
+import { useStore } from '../../../app/stores/store';
 
 interface RouteParams {
   groupId: string;
@@ -27,7 +20,7 @@ interface IProps extends RouteComponentProps<RouteParams> {}
 const GroupList: React.FC<IProps> = () => {
   let history = useHistory();
 
-  const { groupStore, userStore } = useContext(RootStoreContext);
+  const { groupStore, userStore } = useStore();
   const { loadGroups, setSelectedGroupEmpty, selectedGroupId } = groupStore;
   const { user } = userStore;
   // console.log('history location state ', history.location.state);

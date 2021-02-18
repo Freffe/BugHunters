@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using AutoMapper;
 using Domain;
 using MediatR;
@@ -12,9 +13,9 @@ namespace Application.Tickets
 {
     public class List
     {
-        public class Query : IRequest<List<TicketDto>> { }
+        public class Query : IRequest<Result<List<TicketDto>>> { }
 
-        public class Handler : IRequestHandler<Query, List<TicketDto>>
+        public class Handler : IRequestHandler<Query, Result<List<TicketDto>>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -24,11 +25,11 @@ namespace Application.Tickets
                 _context = context;
             }
 
-            public async Task<List<TicketDto>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<List<TicketDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var tickets = await _context.Tickets.ToListAsync();
-
-                return _mapper.Map<List<Ticket>, List<TicketDto>>(tickets);
+                var mappedTickets = _mapper.Map<List<Ticket>, List<TicketDto>>(tickets);
+                return Result<List<TicketDto>>.Success(mappedTickets);
             }
         }
     }

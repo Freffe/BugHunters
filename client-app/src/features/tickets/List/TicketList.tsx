@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Divider,
   Dropdown,
@@ -13,9 +13,9 @@ import { observer } from 'mobx-react-lite';
 import StatusStats from './StatusStats';
 import SearchList from './SearchList';
 import { arrayContains } from '../../utils/helperMethods';
-import { RootStoreContext } from '../../../app/stores/rootStore';
 import { Link } from 'react-router-dom';
 import { IMember } from '../../../app/models/groups';
+import { useStore } from '../../../app/stores/store';
 
 const tagOptions = [
   {
@@ -39,7 +39,7 @@ const tagOptions = [
 ];
 
 const TicketList = () => {
-  const { ticketStore, groupStore } = useContext(RootStoreContext);
+  const { ticketStore, groupStore } = useStore();
   const { setSelectedTicket } = ticketStore;
   const [filterStatus, setFilterStatus] = useState('');
   const [filterGroup, setGroupFilter] = useState('');

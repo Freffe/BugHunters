@@ -1,10 +1,15 @@
 import { makeAutoObservable, reaction, runInAction } from "mobx";
-import { RootStore } from "./rootStore";
+import { ServerError } from "../models/serverError";
+
+
 
 export default class CommonStore {
-    rootStore: RootStore;
-    constructor(rootStore: RootStore) {
-        this.rootStore = rootStore;
+    error: ServerError | null = null;
+    token: string | null = window.localStorage.getItem("jwt");
+    appLoaded = false;
+    
+    constructor() {
+     
         makeAutoObservable(this);
 
         reaction(
@@ -19,8 +24,6 @@ export default class CommonStore {
         ) 
     }
 
-    token: string | null = window.localStorage.getItem("jwt");
-    appLoaded = false;
 
     setToken = (token: string | null) => {
         this.token = token;
@@ -30,5 +33,9 @@ export default class CommonStore {
         runInAction(() => {
             this.appLoaded = true;
         });
+    }
+
+    setServerError = (error: ServerError) => {
+        this.error = error;
     }
 }

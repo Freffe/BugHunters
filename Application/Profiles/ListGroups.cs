@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Core;
 using Application.Errors;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +14,13 @@ namespace Application.Profiles
 {
     public class ListGroups
     {
-        public class Query : IRequest<List<UserGroupDto>>
+        public class Query : IRequest<Result<List<UserGroupDto>>>
         {
             public string Username { get; set; }
             public string Predicate { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, List<UserGroupDto>>
+        public class Handler : IRequestHandler<Query, Result<List<UserGroupDto>>>
         {
             private readonly DataContext _context;
             public Handler(DataContext context)
@@ -27,13 +28,13 @@ namespace Application.Profiles
                 _context = context;
             }
 
-            public async Task<List<UserGroupDto>> Handle(Query request,
+            public async Task<Result<List<UserGroupDto>>> Handle(Query request,
                 CancellationToken cancellationToken)
             {
                 var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == request.Username);
 
                 if (user == null)
-                    throw new RestException(HttpStatusCode.NotFound, new { User = "Not found" });
+                    return null;
 
                 var queryable = user.UserGroups
                     .OrderBy(a => a.Group.CreatedAt)
@@ -72,7 +73,7 @@ namespace Application.Profiles
                     groupsToReturn.Add(userGroup);
                 }
 
-                return groupsToReturn;
+                return Result<List<UserGroupDto>>.Success(groupsToReturn);
             }
         }
     }

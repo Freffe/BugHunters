@@ -1,15 +1,15 @@
-import React, { Fragment, useContext, useEffect } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { Segment, Header, Comment } from 'semantic-ui-react';
-import { RootStoreContext } from '../../../app/stores/rootStore';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { formatDistance } from 'date-fns';
 import GroupClickToComment from './GroupClickToComment';
+import { useStore } from '../../../app/stores/store';
 
 const GroupDetailedChatFlow = () => {
-  const rootStore = useContext(RootStoreContext);
+  const { groupStore } = useStore();
 
-  const { stopHubConnection, selectedGroup } = rootStore.groupStore;
+  const { stopHubConnection, selectedGroup } = groupStore;
 
   useEffect(() => {
     //gottaCreateHub();
