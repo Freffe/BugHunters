@@ -59,7 +59,17 @@ export default class GroupStore {
             .sort((a, b) => a.groupName?.charAt(0).localeCompare(b.groupName.charAt(0)))
             .map((group: IGroup) => ({"key": group.id, "value":  group.id, "text": group.groupName } ) )
     }
-
+    get groupTitleForUserOptions() {
+        return Array.from(this.groupRegistry.values())
+        .slice()
+        .sort((a, b) => a.groupName?.charAt(0).localeCompare(b.groupName.charAt(0)))
+        .filter((group: IGroup) => group.members?.filter((member: IMember) => 
+           //*(member.username === this.rootStore.userStore.user?.username)).length
+           (member.username === store.userStore.user?.username)).length
+        ).map((group: IGroup) => 
+            ({"key": group.id, "value":  group.id, "text": group.groupName })
+        );
+    }
     get selectedGroup() {
         return Array.from(this.groupRegistry.values()).find((grp: IGroup) => grp.id === this.selectedGroupId);
     }

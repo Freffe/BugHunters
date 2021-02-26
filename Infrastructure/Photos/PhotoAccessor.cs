@@ -18,7 +18,7 @@ namespace Infrastructure.Photos
         private const int FILESIZE = 500000;
         private static readonly IList<String> FILETYPES = new ReadOnlyCollection<string>
             (new List<String> {
-         "image/jpeg", "image/png", "image.jpg" });
+         "image/jpeg", "image/png", "image/jpg" });
         private readonly Cloudinary _cloudinary;
         // For strongly typed access to user secrets
         public PhotoAccessor(IOptions<CloudinarySettings> config)

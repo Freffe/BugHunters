@@ -25,6 +25,18 @@ const composeValidators = (...validators: any) => (value: string) =>
     undefined
   );
 
+const priorityOptions = [
+  { key: 'Low', value: 'low', text: 'Low' },
+  { key: 'Medium', value: 'medium', text: 'Medium' },
+  { key: 'High', value: 'high', text: 'High' },
+];
+
+const statusOptions = [
+  { key: 'Open', value: 'open', text: 'Open' },
+  { key: 'Verify', value: 'verify', text: 'Ready for verification' },
+  { key: 'Closed', value: 'closed', text: 'Closed' },
+];
+
 const paragraphStyles = {
   size: '8px',
   color: 'grey',
@@ -43,7 +55,12 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
     submittingTicket,
     ticketFiles,
   } = ticketStore;
-  const { groupTitles, loadGroups, loadingGroups } = groupStore;
+  const {
+    groupTitleForUserOptions,
+    groupTitles,
+    loadGroups,
+    loadingGroups,
+  } = groupStore;
   const ticket: ITicket = initialTicketState ?? new TicketFormValues();
   const [files, setFiles] = useState<any[]>([]);
 
@@ -97,7 +114,7 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
               validate={required}
               name='groupId'
               placeholder='Group'
-              options={groupTitles}
+              options={groupTitleForUserOptions}
               value={ticket.groupId}
               component={SelectInput}
             />
@@ -120,10 +137,11 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
             <p style={paragraphStyles}>Priority</p>
             <Field
               validate={required}
-              component={TextInput}
+              component={SelectInput}
               placeholder='Priority'
               name='priority'
               value={ticket.priority}
+              options={priorityOptions}
             />
             <p style={paragraphStyles}>Device</p>
             <Field
@@ -146,10 +164,11 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
 
             <Field
               validate={required}
-              component={TextInput}
+              component={SelectInput}
               placeholder='Status'
               name='status'
               value={ticket.status}
+              options={statusOptions}
             />
             <p style={paragraphStyles}>Description</p>
 

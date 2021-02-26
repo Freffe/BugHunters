@@ -19,7 +19,6 @@ const Profile: React.FC<IProps> = ({ match }) => {
   const { loadGroups, loadingGroups } = groupStore;
 
   useEffect(() => {
-    console.log('One');
     async function loadstuff() {
       await loadProfile(match.params.username);
       await loadGroups();

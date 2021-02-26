@@ -23,13 +23,13 @@ const GroupList: React.FC<IProps> = () => {
   const { groupStore, userStore } = useStore();
   const { loadGroups, setSelectedGroupEmpty, selectedGroupId } = groupStore;
   const { user } = userStore;
-  // console.log('history location state ', history.location.state);
+
   let isProfileRedirect = history.location.state === 'profileGroups';
   const [selectedGroup, setSelectedGroup] = useState<null | string>(
     isProfileRedirect ? selectedGroupId : null
   );
   const [isCreatingGroup, setCreatingGroup] = useState(false);
-  //console.log('id: ', groupStore.selectedGroup, groupStore.selectedGroupId);
+
   useEffect(() => {
     async function gottaLoadGroups() {
       await loadGroups();
@@ -40,7 +40,6 @@ const GroupList: React.FC<IProps> = () => {
       (!isProfileRedirect && selectedGroupId === '') ||
       (isProfileRedirect && selectedGroupId === '')
     ) {
-      console.log('Loading groups!');
       gottaLoadGroups();
     }
     return () => {
@@ -55,8 +54,6 @@ const GroupList: React.FC<IProps> = () => {
     }
     groupStore.setSelectedGroup(data.value);
     setSelectedGroup(data.value);
-    //history.push(`/groups/${data.value}`);
-    // Now filter list items shown on data.value for status
   };
 
   const isMember = (selectedGroup: string) => {
@@ -65,8 +62,6 @@ const GroupList: React.FC<IProps> = () => {
     let checkingGrp: IGroup = groupStore.selectedGroup;
     let isMemberFlag = false;
     // Check if user is member in group
-    // This gives
-    // useObserver.ts:119 Uncaught TypeError: _checkingGrp$members.forEach is not a function
     checkingGrp.members?.forEach((member: IMember) => {
       if (member.username === user?.username) isMemberFlag = true;
     });

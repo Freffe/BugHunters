@@ -152,13 +152,13 @@ export default class TicketStore {
     }
     setTicketFiles = async (photo: any) => {
         //this.ticketFiles = photo;
-        console.log("RECEIVED: ", photo)
+
         if (photo.length > 0) {
             let images: Array<{ blob: Blob; name: any }> = [];
             for (var i = 0; i < photo.length; i++) {
                 //console.log("photo[i].type === ", photo[i].type, " photo[i] = ", photo[i], ["image/png", "image/jpg", "image/jpeg"].includes(photo[i].type))          
                 if (photo[i] && ["image/png", "image/jpg", "image/jpeg"].includes(photo[i].type)) {
-                    console.log("photo[i].name === ", photo[i].name)
+
                     let image = await this.fileToBlob(photo[i]);
                     let sendThis = { blob: image, name: photo[i].name };
                     images.push(sendThis);
@@ -172,7 +172,7 @@ export default class TicketStore {
                 }
             }
             runInAction(() => {
-                console.log("Setting ticketFiles to: ", images);
+
                 if (this.ticketFiles.length > 0) {
                     images.forEach((image) => {
                         this.ticketFiles.push(image);
@@ -187,13 +187,12 @@ export default class TicketStore {
             })
         }
 
-        console.log("setTicketFiles: ", this.ticketFiles);
+
     }
 
     createWithPhoto = async (ticket: ITicket) => {
         this.submittingTicket = true;
         try {
-            console.log("TICKETFILES: ", this.ticketFiles);
             //await agent.Tickets.createWithPhoto(ticket, photo);
             //console.log("Sending: ", photo);
             await agent.Tickets.createTicketMultiple(ticket, this.ticketFiles)
@@ -290,7 +289,6 @@ export default class TicketStore {
                 let retu = this.selectedTicket?.comments?.filter((comment: IComment) => comment.id !== commentId )
                 let ticket = this.selectedTicket;
                 this.selectedTicket!.comments = retu;
-                console.log("selected ticket: ", ticket, " returned: ", retu);
                 this.ticketRegistry.set(ticketId, ticket);
                 this.isDeletingComment = false;
 
@@ -309,13 +307,10 @@ export default class TicketStore {
         try {
             if (!this.ticketRegistry.has(ticketId)) 
                     await this.loadTickets();
-            //console.log("-> : ", body.body);
             await agent.Tickets.editComment(ticketId, commentId, body);
             runInAction(() => {
-                // get ticket  
                 let tickets = this.ticketRegistry.get(ticketId);
                 let ticket = toJS(tickets);
-                //let ticket = tickets.values();
                 // Update comment
                 ticket.comments.forEach((comment: IComment) =>  { 
                     if(comment.id === commentId) { 
@@ -339,7 +334,6 @@ export default class TicketStore {
     addPhoto = async (ticketId: string, photo: Blob) => {
         this.isAddingPhoto = true;
         try {
-            console.log("Photo: ", photo);
             const returnedPhoto = await agent.Tickets.addPhoto(ticketId, photo);
             runInAction(() => {
                 // TODO: Try not to touch ticketregistry for now.
@@ -377,7 +371,6 @@ export default class TicketStore {
     addTextFile = async (ticketId: string, text: Blob) => {
         this.isAddingText = true;
         try {
-            //console.log("TEXT BEFORE SENDING: ", text);
             
             const returnedTextFile = await agent.Tickets.addTextFile(ticketId, text);
             runInAction(() => {

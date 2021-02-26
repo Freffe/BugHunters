@@ -42,7 +42,6 @@ const GroupDetails: React.FC<IProps> = ({ group }) => {
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   // Clean up when grouplist -> chat works.
   useEffect(() => {
-    console.log('GroupDetails called');
     createHubConnection(selectedGroupId);
     return () => {
       stopHubConnection();

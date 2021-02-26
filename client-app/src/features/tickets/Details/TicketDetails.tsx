@@ -60,7 +60,6 @@ const TicketDetails: React.FC<IProps> = ({
       setActiveIndex([activeIndex[0], activeIndex[1], !activeIndex[2]]);
     }
   };
-  console.log('RENDERING TICKETDETAILS');
 
   return (
     <Grid>

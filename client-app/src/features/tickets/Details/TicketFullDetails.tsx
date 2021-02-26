@@ -54,7 +54,6 @@ const TicketFullDetails: React.FC<IProps> = ({ match }) => {
   const [isEditingTicket, setIsEditingTicket] = useState(false);
 
   useEffect(() => {
-    console.log('Hooks changed');
     if (selectedTicket === null && match.params.id) {
       setSelectedTicketFromId(match.params.id);
     }
