@@ -90,28 +90,32 @@ export default class GroupStore {
         // process.env.REACT_APP_API_CHAT_URL!
         // Prevent this from opening two connections with the same token.
         try {
-            this.hubConnection = new HubConnectionBuilder().withUrl(process.env.REACT_APP_API_CHAT_URL + '?groupId=' + groupId, {
-                //*accessTokenFactory: () => this.rootStore.commonStore.token!
-                accessTokenFactory: () => store.commonStore.token!
-            })
-            .configureLogging(LogLevel.Information).build();
-            //console.log("Starting hub connection: ", this.selectedGroupId!);
-            this.hubConnection
-                .start()
-                .then(() => console.log(this.hubConnection!.state))
-                .then(() => {
-                    if(this.hubConnection!.state === "Connected") {
-                    this.hubConnection!.invoke("AddToGroup", groupId)
-                    }
-                })
-            .catch(error => console.log("Error establishing connection: ", error));
-            // This is being called twice when coming from profile/profileGroups link
+            if (this.selectedGroupId) {
 
-                this.hubConnection?.on("ReceiveComment", comment => {
-                    runInAction(() => {
-                        this.selectedGroup!.comments.push(comment);
-                    });
+                this.hubConnection = new HubConnectionBuilder()
+                    .withUrl(process.env.REACT_APP_API_CHAT_URL + '?groupId=' + groupId, {
+                    //*accessTokenFactory: () => this.rootStore.commonStore.token!
+                    accessTokenFactory: () => store.commonStore.token!
                 })
+                .configureLogging(LogLevel.Information).build();
+                //console.log("Starting hub connection: ", this.selectedGroupId!);
+                this.hubConnection
+                    .start()
+                    .then(() => console.log(this.hubConnection!.state))
+                    .then(() => {
+                        if(this.hubConnection!.state === "Connected") {
+                        this.hubConnection!.invoke("AddToGroup", groupId)
+                        }
+                    })
+                .catch(error => console.log("Error establishing connection: ", error));
+                // This is being called twice when coming from profile/profileGroups link
+    
+                    this.hubConnection?.on("ReceiveComment", comment => {
+                        runInAction(() => {
+                            this.selectedGroup!.comments.push(comment);
+                        });
+                    })
+            }
         } catch(error) {
             console.log(error);
         }

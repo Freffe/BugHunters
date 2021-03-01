@@ -34,7 +34,7 @@ namespace Application.Profiles
 
             // Is user following username?
             // var currentUser = await _context.Users.SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
-            List<Ticket> L = user.Tickets.ToList();
+            List<Ticket> L = user.Tickets?.ToList();
             var profile = new Profile
             {
                 DisplayName = user.DisplayName,
