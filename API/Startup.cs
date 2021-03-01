@@ -48,6 +48,13 @@ namespace API
                 opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
 
             });
+            services.AddCors(opt =>
+            {
+                opt.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy.AllowAnyHeader().AllowAnyMethod().WithExposedHeaders("WWW-Authenticate").WithOrigins("http://localhost:3000").AllowCredentials();
+                });
+            });
             ConfigureServices(services);
         }
 
@@ -60,6 +67,13 @@ namespace API
                 //opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
 
             });*/
+            services.AddCors(opt =>
+            {
+                opt.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy.AllowAnyHeader().AllowAnyMethod().WithExposedHeaders("WWW-Authenticate").WithOrigins("https://bugshunting.herokuapp.com").AllowCredentials();
+                });
+            });
             services.AddDbContext<DataContext>(options =>
                 {
                     var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
@@ -91,13 +105,6 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddCors(opt =>
-            {
-                opt.AddPolicy("CorsPolicy", policy =>
-                {
-                    policy.AllowAnyHeader().AllowAnyMethod().WithExposedHeaders("WWW-Authenticate").WithOrigins("http://localhost:3000").AllowCredentials();
-                });
-            });
             services.AddMediatR(typeof(List.Handler).Assembly);
             services.AddAutoMapper(typeof(List.Handler));
             services.AddSignalR();
