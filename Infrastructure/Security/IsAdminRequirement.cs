@@ -39,7 +39,7 @@ namespace Infrastructure.Security
 
 
                 // Or is the user an admin of this grp?
-                var usersMembership = group.UserGroups.FirstOrDefault(x => x.AppUser.UserName == currentUserName);
+                var usersMembership = group.UserGroups?.FirstOrDefault(x => x.AppUser.UserName == currentUserName);
 
                 if (usersMembership.IsHost || usersMembership.IsAdmin)
                     context.Succeed(requirement);

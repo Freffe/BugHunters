@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Core;
@@ -55,7 +56,8 @@ namespace Application.Groups
                     Open = 0,
                     Closed = 0,
                     Verify = 0,
-                    IsPublic = request.IsPublic
+                    IsPublic = request.IsPublic,
+                    Comments = new List<Comment>()
                 };
 
                 _context.Groups.Add(group);
