@@ -20,9 +20,7 @@ const GroupDetailsFooter: React.FC<IProps> = ({ group }) => {
     <div style={{ backgroundColor: 'rgb(7, 20, 38)', color: 'white' }}>
       <List horizontal floated='left'>
         <List.Item>Alive since {group.createdAt!.split('T')[0]}</List.Item>
-        <List.Item>
-          {group.groupName}'s: {group.members?.length}
-        </List.Item>
+        <List.Item>Members: {group.members?.length}</List.Item>
       </List>
 
       <List horizontal floated='right'>

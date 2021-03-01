@@ -30,11 +30,8 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
   useEffect(() => {
     autorun(() => {
       if (token && !appLoaded) {
-        console.log('Token: ', token, ' apploaded: ', appLoaded);
         getUser().finally(() => setAppLoaded());
-        console.log('Token1: ', token, ' apploaded1: ', appLoaded);
       } else if (!appLoaded) {
-        console.log('Token2: ', token, ' apploaded2: ', appLoaded);
         setAppLoaded();
       }
     });

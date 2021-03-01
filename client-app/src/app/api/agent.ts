@@ -91,7 +91,11 @@ const requests = {
     postForm: async (url: string, file: any) => {
         const formData = new FormData();
         // Note: Keyword_must_be "File" 
-        formData.append("File", file.blob, file.name);
+        if (file.blob) {
+            formData.append("File", file.blob, file.name);
+        } else {
+            formData.append("File", file);
+        }
         return axios.post(url, formData, {
             headers: {'Content-Type': "multipart/form-data"}
         }).then(responseBody)

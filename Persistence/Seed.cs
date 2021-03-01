@@ -50,8 +50,8 @@ namespace Persistence
                 {
                     new Group
                     {
-                        GroupName = "Suckers",
-                        Description = "Welcome to the Shitty Iphone Group where we look at eachothers iphones and sigh.",
+                        GroupName = "Test",
+                        Description = "Welcome to the test group where you can test stuff.",
                         CreatedAt = DateTime.UtcNow,
                         IsPublic = true,
                         UserGroups = new List<UserGroup>
@@ -81,8 +81,8 @@ namespace Persistence
                     },
                     new Group
                     {
-                        GroupName = "Badass",
-                        Description = "Android rules dude",
+                        GroupName = "More then one",
+                        Description = "Android wins",
                         CreatedAt = DateTime.UtcNow,
                         IsPublic = true,
                         UserGroups = new List<UserGroup>
@@ -111,123 +111,29 @@ namespace Persistence
                 {
                     new Ticket
                     {
-                        Title = "[Swedish][Camera] Buggy cam",
-                        Date = DateTime.Now.AddMonths(-2),
-                        Description = "Camera is taking photos instead of recording video",
-                        Status = "Closed",
-                        BugType = "Localization",
-                        Device = "Samsung Galaxy S5",
-                        Version = "v1",
-                        Priority = "High",
-                        TicketOwnerId = "a"
-                    },
-                    new Ticket
-                    {
-                        Title = "[Swedish][Camera] Buggys cam",
-                        Date = DateTime.Now.AddMonths(-1),
-                        Description = "Activity 1 month ago",
-                        Status = "Open",
-                        BugType = "Localization",
-                        Device = "Samsung Galaxy S5",
-                        Version = "v1",
-                        Priority = "High",
-                        TicketOwnerId = "a"
-                    },
-                    new Ticket
-                    {
-                        Title = "[Swedish][Camera] Buggy zcam",
-                        Date = DateTime.Now.AddMonths(1),
-                        Description = "Activity 1 month in future",
-                        Status = "Open",
-                        BugType = "Localization",
-                        Device = "Samsung Galaxy S5",
-                        Version = "v1",
-                        Priority = "High",
-                        TicketOwnerId = "a"
-                    },
-                    new Ticket
-                    {
-                        Title = "[Swedish][Camera] Buggyq cam",
-                        Date = DateTime.Now.AddMonths(2),
-                        Description = "Activity 2 months in future",
-                        Status = "Open",
-                        BugType = "Localization",
-                        Device = "Samsung Galaxy S5",
-                        Version = "v1",
-                        Priority = "High",
-                        TicketOwnerId = "c"
-                    },
-                    new Ticket
-                    {
-                        Title = "[Swedish][Camera] Buggye cam",
-                        Date = DateTime.Now.AddMonths(3),
-                        Description = "Activity 3 months in future",
-                        Status = "Open",
-                        BugType = "Localization",
-                        Device = "Samsung Galaxy S5",
-                        Version = "v1",
-                        Priority = "High",
-                        TicketOwnerId = "b"
-                    },
-                    new Ticket
-                    {
-                        Title = "[Swedish][Camera] Buggytr cam",
-                        Date = DateTime.Now.AddMonths(4),
-                        Description = "Activity 4 months in future",
-                        Status = "Open",
-                        BugType = "Localization",
-                        Device = "Samsung Galaxy S5",
-                        Version = "v1",
-                        Priority = "High",
-                        TicketOwnerId = "b"
-                    },
-                    new Ticket
-                    {
-                        Title = "[Swedish][Camera] Buggyqwe cam",
-                        Date = DateTime.Now.AddMonths(5),
-                        Description = "Activity 5 months in future",
-                        Status = "Open",
-                        BugType = "Localization",
-                        Device = "Samsung Galaxy S5",
-                        Version = "v1",
-                        Priority = "High",
-                        TicketOwnerId = "b"
-                    },
-                    new Ticket
-                    {
-                        Title = "[Swedish][Camera] Buggyzzz cam",
+                        Title = "[Swedish][Camera] Buggy edges",
                         Date = DateTime.Now.AddMonths(6),
-                        Description = "Activity 6 months in future",
+                        Description = "The camera is leaking frames at the edges.",
                         Status = "Open",
-                        BugType = "Localization",
+                        BugType = "UI",
                         Device = "Samsung Galaxy S5",
                         Version = "v1",
                         Priority = "High",
-                        TicketOwnerId = "b"
+                        TicketOwnerId = "b",
+                        Creator = "bob@test.com"
                     },
                     new Ticket
                     {
-                        Title = "[Swedish][Camera] Buggyaa cam",
-                        Date = DateTime.Now.AddMonths(7),
-                        Description = "Activity 2 months ago",
-                        Status = "Open",
-                        BugType = "Localization",
-                        Device = "Samsung Galaxy S10",
-                        Version = "v4",
-                        Priority = "Low",
-                        TicketOwnerId = "b"
-                    },
-                    new Ticket
-                    {
-                        Title = "[Swedish][Camera] Buggyweqwe cam",
+                        Title = "[Danish][Profile] Profile pictures doesnt work",
                         Date = DateTime.Now.AddMonths(8),
-                        Description = "Activity 8 months in future",
+                        Description = "SOmething wrong with the picture upload on your profile.",
                         Status = "Open",
-                        BugType = "Localization",
+                        BugType = "UI",
                         Device = "Samsung Galaxy S5",
                         Version = "v1",
                         Priority = "High",
-                        TicketOwnerId = "b"
+                        TicketOwnerId = "b",
+                        Creator = "bob@test.com"
                     }
                 };
 

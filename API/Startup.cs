@@ -44,18 +44,47 @@ namespace API
             {
                 opt.UseLazyLoadingProxies();
                 //opt.UseSqlite(Configuration.GetConnectionString("SqliteConnection"));
-                opt.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
+                //opt.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
+                opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
+
             });
             ConfigureServices(services);
         }
 
         public void ConfigureProductionServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(opt =>
+            /*services.AddDbContext<DataContext>(opt =>
             {
                 opt.UseLazyLoadingProxies();
-                opt.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
-            });
+                //opt.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
+                //opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
+
+            });*/
+            services.AddDbContext<DataContext>(options =>
+                {
+                    var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+                    string connStr;
+                    // Use connection string provided at runtime by Heroku.
+                    var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+                    // Parse connection URL to connection string for Npgsql
+                    connUrl = connUrl.Replace("postgres://", string.Empty);
+                    var pgUserPass = connUrl.Split("@")[0];
+                    var pgHostPortDb = connUrl.Split("@")[1];
+                    var pgHostPort = pgHostPortDb.Split("/")[0];
+                    var pgDb = pgHostPortDb.Split("/")[1];
+                    var pgUser = pgUserPass.Split(":")[0];
+                    var pgPass = pgUserPass.Split(":")[1];
+                    var pgHost = pgHostPort.Split(":")[0];
+                    var pgPort = pgHostPort.Split(":")[1];
+
+                    connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb}; SSL Mode=Require; Trust Server Certificate=true";
+
+                    // Whether the connection string came from the local development configuration file
+                    // or from the environment variable from Heroku, use it to set up your DbContext.
+                    options.UseNpgsql(connStr);
+                });
             ConfigureServices(services);
         }
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -143,6 +172,21 @@ namespace API
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseMiddleware<ErrorHandlingMiddleware>();
+
+            app.UseXContentTypeOptions();
+            app.UseReferrerPolicy(opt => opt.NoReferrer());
+            app.UseXXssProtection(opt => opt.EnabledWithBlockMode());
+            app.UseXfo(opt => opt.Deny());
+            app.UseCspReportOnly(opt => opt
+                .BlockAllMixedContent()
+                .StyleSources(s => s.Self().CustomSources("https://fonts.googleapis.com"))
+                .FontSources(s => s.Self().CustomSources("https://fonts.gstatic.com", "data:"))
+                .FormActions(s => s.Self())
+                .FrameAncestors(s => s.Self())
+                .ImageSources(s => s.Self().CustomSources("https://res.cloudinary.com"))
+                .ScriptSources(s => s.Self().CustomSources("sha256-2qaffocGfdC34bSOjU8eZYTYPvgrUKzaxglVBPwR6jA="))
+            );
+
             if (env.IsDevelopment())
             {
                 // app.UseDeveloperExceptionPage();
@@ -156,24 +200,11 @@ namespace API
                     await next.Invoke();
                 });
             }
-
-            app.UseXContentTypeOptions();
-            app.UseReferrerPolicy(opt => opt.NoReferrer());
-            app.UseXXssProtection(opt => opt.EnabledWithBlockMode());
-            app.UseXfo(opt => opt.Deny());
-            app.UseCspReportOnly(opt => opt
-                .BlockAllMixedContent()
-                .StyleSources(s => s.Self().CustomSources("https://fonts.googleapis.com"))
-                .FontSources(s => s.Self().CustomSources("https://fonts.gstatic.com", "data:"))
-                .FormActions(s => s.Self())
-                .FrameAncestors(s => s.Self())
-                .ImageSources(s => s.Self().CustomSources("https://res.cloudinary.com"))
-                .ScriptSources(s => s.Self())
-            );
-
             //app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseAuthorization();
@@ -182,6 +213,7 @@ namespace API
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<ChatHub>("/chat");
+                endpoints.MapFallbackToController("Index", "Fallback");
             });
         }
     }

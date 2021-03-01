@@ -65,8 +65,7 @@ export default class ProfileStore {
 
     uploadPhoto = async (file: Blob) => {
         this.uploadingPhoto = true;
-        try {
-            console.log("The img looks like this: ", file);
+        try {           
             const photo = await agent.Profiles.uploadPhoto(file);
             runInAction(() => {
                 if (this.profile) {

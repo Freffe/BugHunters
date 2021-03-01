@@ -36,7 +36,6 @@ namespace Application.Photos
             {
                 // handler logic
                 var photoUploadResult = _photoAccessor.AddPhoto(request.File);
-                Console.WriteLine("Inside handler of addGroupPhoto");
                 var group = await _context.Groups.SingleOrDefaultAsync(x => x.Id == request.Id);
                 if (group == null)
                     return null;

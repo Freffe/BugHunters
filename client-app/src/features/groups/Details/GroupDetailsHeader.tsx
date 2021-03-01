@@ -1,5 +1,13 @@
 import React from 'react';
-import { Grid, Header, Segment, Image, Popup, Button } from 'semantic-ui-react';
+import {
+  Grid,
+  Header,
+  Segment,
+  Image,
+  Popup,
+  Button,
+  GridColumn,
+} from 'semantic-ui-react';
 
 interface IProps {
   groupId: string;
@@ -35,7 +43,7 @@ const GroupDetailsHeader: React.FC<IProps> = ({
       }}
     >
       <Grid columns='two'>
-        <Grid.Column textAlign='left' width={6}>
+        <Grid.Column textAlign='left' width={4}>
           <Header floated='left' as='h2' style={{ marginRight: '0px' }}>
             <Image
               style={{
@@ -102,20 +110,18 @@ const GroupDetailsHeader: React.FC<IProps> = ({
             </Grid.Row>
           )}
         </Grid.Column>
-        <Grid.Column>
+        <GridColumn>
           <Header
             as='h1'
-            textAlign='center'
             style={{
-              marginLeft: '53px',
               marginTop: '0px',
+              textAlign: 'center',
               color: 'white',
             }}
-            floated='left'
           >
             {groupName}
           </Header>
-        </Grid.Column>
+        </GridColumn>
       </Grid>
     </Segment>
   );

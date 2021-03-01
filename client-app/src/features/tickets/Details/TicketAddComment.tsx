@@ -40,7 +40,7 @@ const TicketAddComment: React.FC<IProps> = ({
             <Form
               onSubmit={() =>
                 handleSubmit()!.then(() => {
-                  console.log('Submitted');
+                  //console.log('Submitted');
                   setShouldComment(false);
                   form.reset();
                 })
