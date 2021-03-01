@@ -39,7 +39,7 @@ namespace Application.Profiles
             {
                 DisplayName = user.DisplayName,
                 Username = user.UserName,
-                Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
+                Image = user.Photos?.FirstOrDefault(x => x.IsMain)?.Url,
                 Photos = user.Photos,
                 Bio = user.Bio,
                 Tickets = _mapper.Map<List<Ticket>, List<TicketDto>>(L)
