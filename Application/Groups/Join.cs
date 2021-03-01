@@ -37,12 +37,12 @@ namespace Application.Groups
                     return null;
 
                 var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
-                Console.WriteLine($"Group is: {user}, using {_userAccessor.GetCurrentUsername()}");
+                Console.WriteLine($"User is: {user}, using {_userAccessor.GetCurrentUsername()}");
                 if (user == null)
                     return null;
 
                 var membership = await _context.UserGroups.SingleOrDefaultAsync(x => x.GroupId == group.Id && x.AppUserId == user.Id);
-
+                Console.WriteLine($"membership is: {membership}, using {user.Id}");
                 if (membership != null)
                     return null;
 
