@@ -32,10 +32,12 @@ namespace Application.Groups
             public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var group = await _context.Groups.FindAsync(request.Id);
+                Console.WriteLine($"Group is: {group}, using {request.Id}");
                 if (group == null)
                     return null;
 
                 var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
+                Console.WriteLine($"Group is: {user}, using {_userAccessor.GetCurrentUsername()}");
                 if (user == null)
                     return null;
 

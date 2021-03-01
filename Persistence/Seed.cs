@@ -70,7 +70,7 @@ namespace Persistence
                                 DateJoined = DateTime.Now.AddMonths(-2),
                                 IsAdmin = true
                             },
-                                        new UserGroup
+                            new UserGroup
                             {
                                 AppUserId = "c",
                                 IsHost = false,
@@ -105,40 +105,6 @@ namespace Persistence
                     }
                 };
 
-                if (!context.Tickets.Any())
-                {
-                    var tickets = new List<Ticket>
-                {
-                    new Ticket
-                    {
-                        Title = "[Swedish][Camera] Buggy edges",
-                        Date = DateTime.Now.AddMonths(6),
-                        Description = "The camera is leaking frames at the edges.",
-                        Status = "Open",
-                        BugType = "UI",
-                        Device = "Samsung Galaxy S5",
-                        Version = "v1",
-                        Priority = "High",
-                        TicketOwnerId = "b",
-                        Creator = "bob@test.com"
-                    },
-                    new Ticket
-                    {
-                        Title = "[Danish][Profile] Profile pictures doesnt work",
-                        Date = DateTime.Now.AddMonths(8),
-                        Description = "SOmething wrong with the picture upload on your profile.",
-                        Status = "Open",
-                        BugType = "UI",
-                        Device = "Samsung Galaxy S5",
-                        Version = "v1",
-                        Priority = "High",
-                        TicketOwnerId = "b",
-                        Creator = "bob@test.com"
-                    }
-                };
-
-                    context.Tickets.AddRange(tickets);
-                }
 
                 await context.Groups.AddRangeAsync(groups);
                 await context.SaveChangesAsync();

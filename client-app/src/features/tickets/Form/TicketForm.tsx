@@ -72,7 +72,6 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
     return () => {
       files.forEach((file: any) => URL.revokeObjectURL(file.preview));
     };
-    // Cleanup?
   }, [loadGroups, groupTitles, files]);
 
   const handleFinalFormSubmit = async (values: any) => {
@@ -101,7 +100,7 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
     }
   };
   if (loadingGroups) return <LoadingComponent content='Preparing data...' />;
-  // console.log('Files are: ', files);
+  console.log('Groups are: ', groupTitleForUserOptions);
   return (
     <Segment fluid='true'>
       <FinalForm

@@ -60,6 +60,7 @@ const ProfilePhotos = () => {
           ) : (
             <Card.Group itemsPerRow={5}>
               {profile &&
+                profile.photos &&
                 profile.photos.map((photo) => (
                   <Card key={photo.id}>
                     <Image src={photo.url} />
