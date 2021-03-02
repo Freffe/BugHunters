@@ -76,6 +76,7 @@ namespace API
             });
             services.AddDbContext<DataContext>(options =>
                 {
+                    options.UseLazyLoadingProxies();
                     var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
                     string connStr;
