@@ -93,10 +93,10 @@ const GroupAdminsList: React.FC<IProps> = ({
               style={{
                 borderTopLeftRadius: 0,
                 borderBottomLeftRadius: 0,
-                height: '38px',
+                height: '39px',
                 paddingTop: '0px',
                 paddingBottom: '0px',
-                marginBottom: '3px',
+                marginBottom: '5px',
                 marginRight: '9px',
               }}
               loading={isPromotingMember}
