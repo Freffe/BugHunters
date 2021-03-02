@@ -1,6 +1,6 @@
 {
   "short_name": "React App",
-  "name": "Create React App Sample",
+  "name": "Bugshunting",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,12 +8,12 @@
       "type": "image/x-icon"
     },
     {
-      "src": "bughunter192.png",
+      "src": "bugHunter192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "bughunter512.png",
+      "src": "bugHunter512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
