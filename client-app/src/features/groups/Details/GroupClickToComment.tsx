@@ -14,7 +14,6 @@ const GroupClickToComment: React.FC<{ isAnnouncement: boolean }> = ({
   const [shouldComment, setShouldComment] = useState(false);
 
   const submitAnnouncement = async (val: any) => {
-    //console.log('SubmitComment: ', val.body);
     try {
       if (isAnnouncement) {
         const body = {

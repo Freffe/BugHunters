@@ -58,7 +58,6 @@ const GroupForm: React.FC<IProps> = ({
       };
       //Create a new group
       await groupStore.createGroup(newGroup);
-      console.log('Group created successfully');
       setSelectedGroup(newGroup.id);
       setCreatingGroup(false);
     } else {

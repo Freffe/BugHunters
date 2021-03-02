@@ -238,7 +238,6 @@ export default class GroupStore {
                     if (member.username === username)
                         member.isAdmin = true;
                 });
-                console.log("Is he admin? ", this.selectedGroup);
                 this.isPromotingMember = false;
             })
         } catch (error) {
@@ -297,7 +296,6 @@ export default class GroupStore {
     editGroupDescription = async (group: IGroup) => {
         this.isUploadingGroupEdit = true;
         try {
-            console.log("Sending up: ", group);
             await agent.Groups.update(group);
             runInAction(() => {
                 // update groupregistry grp

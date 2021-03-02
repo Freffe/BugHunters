@@ -93,14 +93,13 @@ const TicketForm: React.FC<any | RouteComponentProps> = ({
         createTicket(newTicket);
       }
     } else {
-      console.log('Editing ticket: ', values);
       // Editing existing ticket.
       await editTicket(values);
       if (!submittingTicket && setIsEditingTicket) setIsEditingTicket(false);
     }
   };
   if (loadingGroups) return <LoadingComponent content='Preparing data...' />;
-  console.log('Groups are: ', groupTitleForUserOptions);
+
   return (
     <Segment fluid='true'>
       <FinalForm

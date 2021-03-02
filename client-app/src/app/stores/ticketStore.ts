@@ -318,8 +318,6 @@ export default class TicketStore {
                     } 
                 });
                 this.ticketRegistry.set(ticket.id, ticket);
-                //const ait = this.ticketRegistry.get(ticket.id);
-                //console.log("ait ", ait.comments);
                 this.selectedTicket = ticket;
                 this.isEditingComment = false;
             })

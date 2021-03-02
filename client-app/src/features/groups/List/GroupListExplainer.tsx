@@ -6,7 +6,7 @@ const GroupListExplainer = () => {
     <Segment placeholder>
       <Header icon>
         <Image
-          src='/assets/bughunter-grp.png'
+          src='/assets/BugHunter-grp.png'
           alt='logo'
           style={{ marginRight: '10px', width: '60px', height: '60px' }}
         />

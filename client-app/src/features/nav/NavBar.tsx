@@ -14,7 +14,7 @@ const NavBar = () => {
           <Grid.Column>
             <Menu.Item header as={NavLink} exact to='/'>
               <img
-                src='/assets/bughunter-oranges.png'
+                src='/assets/BugHunter-oranges.png'
                 alt='logo'
                 style={{ marginRight: '10px' }}
               />
