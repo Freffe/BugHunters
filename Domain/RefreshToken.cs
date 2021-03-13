@@ -2,7 +2,6 @@ using System;
 
 namespace Domain
 {
-    // Lives as to: Explain why
     public class RefreshToken
     {
         public int Id { get; set; }
